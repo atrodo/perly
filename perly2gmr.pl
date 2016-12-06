@@ -34,8 +34,7 @@ while (<>)
       foreach my $sym (@syms)
       {
         $tokens{$sym} = { type => $type, sym => $sym, };
-        push @order, $sym
-          if $type eq 'token';
+        push @order, $sym;
       }
     }
   }
@@ -73,6 +72,7 @@ while (<>)
         for (my $i; $i < $#line; $i++)
         {
           my $chr = $line[$i];
+
           if ( @stack )
           {
             if ( $stack[0] eq 'comment')
@@ -82,7 +82,7 @@ while (<>)
               {
                 $rule->{comment} .= '/';
                 $i++;
-                pop @stack;
+                shift @stack;
               }
               next;
             }
@@ -93,6 +93,14 @@ while (<>)
               if ($chr eq q[\\])
               {
                 $rule->{code} .= $line[$i+1];
+                $i++;
+                next;
+              }
+
+              if ($chr eq '/' && $line[$i+1] eq '*')
+              {
+                unshift @stack, 'comment';
+                $rule->{comment} .= '/*';
                 $i++;
                 next;
               }
@@ -120,6 +128,30 @@ while (<>)
               }
               next;
             }
+
+            if ( $stack[0] eq 'rule')
+            {
+              if ($chr eq q[\\])
+              {
+                $rule->{raw_rule} .= $line[$i+1];
+                $i++;
+                next;
+              }
+
+              if ( $stack[-1] eq $chr )
+              {
+                pop @stack;
+              }
+
+              if ( @stack == 1 )
+              {
+                pop @stack;
+                next;
+              }
+
+              $rule->{raw_rule} .= $chr;
+              next;
+            }
           }
 
           if ($chr eq '/' && $line[$i+1] eq '*')
@@ -127,6 +159,13 @@ while (<>)
             push @stack, 'comment';
             $rule->{comment} .= '/*';
             $i++;
+            next;
+          }
+
+          if ($chr eq q['] )
+          {
+            push @stack, 'rule';
+            push @stack, q['];
             next;
           }
 
@@ -182,8 +221,13 @@ use Data::Dumper;
 #warn Dumper(@order);
 
 say "grammar = {";
+my %seen;
 foreach my $sym (@order)
 {
+  next
+    if $seen{$sym};
+  $seen{$sym} = 1;
+
   local $Data::Dumper::Indent = 1;
   local $Data::Dumper::Varname = $sym;
   local $Data::Dumper::Sortkeys = 1;

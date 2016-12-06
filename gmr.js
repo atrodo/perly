@@ -167,16 +167,7 @@ grammar = {
   */
 
   "'.'"            : [
-                       /[.]/i,
-                     ],
-  "INC"            : [
-                       /[+][+]/i,
-                     ],
-  "DEC"            : [
-                       /[-][-]/i,
-                     ],
-  "REFGEN"         : [
-		       /\\/i,
+		       /[.]/i,
 		     ],
   /*
     $WORD1 = {
@@ -761,44 +752,6 @@ grammar = {
 		       "<GRAMSTMTSEQ> <stmtseq>",
 		     ],
   /*
-    $block1 = {
-      'rules' => [
-        {
-          'code' => '{\' remember stmtseq \'} { if (parser->copline > (line_t)$1) parser->copline = (line_t)$1 $$ = block_end($2, $3) } ',
-          'comment' => '',
-          'line' => ' \'{\' remember stmtseq \'}\' { if (parser->copline > (line_t)$1) parser->copline = (line_t)$1 $$ = block_end($2, $3) } ',
-          'raw_rule' => ' \'\' ',
-          'rule' => ''
-        }
-      ],
-      'sym' => 'block',
-      'type' => 'nonterm'
-    };
-  */
-
-  "block"          : [
-		       "",
-		     ],
-  /*
-    $formblock1 = {
-      'rules' => [
-        {
-          'code' => '{ if (parser->copline > (line_t)$1) parser->copline = (line_t)$1 $$ = block_end($2, $5) } ',
-          'comment' => '',
-          'line' => ' \'=\' remember \';\' FORMRBRACK formstmtseq \';\' \'.\' { if (parser->copline > (line_t)$1) parser->copline = (line_t)$1 $$ = block_end($2, $5) } ',
-          'raw_rule' => ' \'=\' remember \';\' FORMRBRACK formstmtseq \';\' \'.\' ',
-          'rule' => '= <remember> ; <FORMRBRACK> <formstmtseq> ; .'
-        }
-      ],
-      'sym' => 'formblock',
-      'type' => 'nonterm'
-    };
-  */
-
-  "formblock"      : [
-		       "= <remember> ; <FORMRBRACK> <formstmtseq> ; .",
-		     ],
-  /*
     $remember1 = {
       'rules' => [
         {
@@ -818,25 +771,6 @@ grammar = {
 		       "",
 		     ],
   /*
-    $mblock1 = {
-      'rules' => [
-        {
-          'code' => '{\' mremember stmtseq \'} { if (parser->copline > (line_t)$1) parser->copline = (line_t)$1 $$ = block_end($2, $3) } ',
-          'comment' => '',
-          'line' => ' \'{\' mremember stmtseq \'}\' { if (parser->copline > (line_t)$1) parser->copline = (line_t)$1 $$ = block_end($2, $3) } ',
-          'raw_rule' => ' \'\' ',
-          'rule' => ''
-        }
-      ],
-      'sym' => 'mblock',
-      'type' => 'nonterm'
-    };
-  */
-
-  "mblock"         : [
-		       "",
-		     ],
-  /*
     $mremember1 = {
       'rules' => [
         {
@@ -853,6 +787,82 @@ grammar = {
   */
 
   "mremember"      : [
+		       "",
+		     ],
+  /*
+    $startsub1 = {
+      'rules' => [
+        {
+          'code' => '{ $$ = start_subparse(FALSE, 0) SAVEFREESV(PL_compcv); } ',
+          'comment' => '/* NULL \*\//* start a regular subroutine scope \*\/',
+          'line' => ' /* NULL \*\/ /* start a regular subroutine scope \*\/ { $$ = start_subparse(FALSE, 0) SAVEFREESV(PL_compcv); } ',
+          'raw_rule' => '   ',
+          'rule' => ''
+        }
+      ],
+      'sym' => 'startsub',
+      'type' => 'nonterm'
+    };
+  */
+
+  "startsub"       : [
+		       "",
+		     ],
+  /*
+    $startanonsub1 = {
+      'rules' => [
+        {
+          'code' => '{ $$ = start_subparse(FALSE, CVf_ANON) SAVEFREESV(PL_compcv); } ',
+          'comment' => '/* NULL \*\//* start an anonymous subroutine scope \*\/',
+          'line' => ' /* NULL \*\/ /* start an anonymous subroutine scope \*\/ { $$ = start_subparse(FALSE, CVf_ANON) SAVEFREESV(PL_compcv); } ',
+          'raw_rule' => '   ',
+          'rule' => ''
+        }
+      ],
+      'sym' => 'startanonsub',
+      'type' => 'nonterm'
+    };
+  */
+
+  "startanonsub"   : [
+		       "",
+		     ],
+  /*
+    $startformsub1 = {
+      'rules' => [
+        {
+          'code' => '{ $$ = start_subparse(TRUE, 0) SAVEFREESV(PL_compcv); } ',
+          'comment' => '/* NULL \*\//* start a format subroutine scope \*\/',
+          'line' => ' /* NULL \*\/ /* start a format subroutine scope \*\/ { $$ = start_subparse(TRUE, 0) SAVEFREESV(PL_compcv); } ',
+          'raw_rule' => '   ',
+          'rule' => ''
+        }
+      ],
+      'sym' => 'startformsub',
+      'type' => 'nonterm'
+    };
+  */
+
+  "startformsub"   : [
+		       "",
+		     ],
+  /*
+    $mintro1 = {
+      'rules' => [
+        {
+          'code' => '{ $$ = (PL_min_intro_pending && PL_max_intro_pending >= PL_min_intro_pending) intro_my(); } ',
+          'comment' => '/* NULL \*\//* Normal expression \*\/',
+          'line' => ' /* NULL \*\/ { $$ = (PL_min_intro_pending && PL_max_intro_pending >= PL_min_intro_pending) intro_my(); } /* Normal expression \*\/ ',
+          'raw_rule' => '   ',
+          'rule' => ''
+        }
+      ],
+      'sym' => 'mintro',
+      'type' => 'nonterm'
+    };
+  */
+
+  "mintro"         : [
 		       "",
 		     ],
   /*
@@ -880,33 +890,6 @@ grammar = {
 
   "stmtseq"        : [
 		       "<fullstmt>*",
-		     ],
-  /*
-    $formstmtseq1 = {
-      'rules' => [
-        {
-          'code' => '{ $$ = (OP*)NULL; } ',
-          'comment' => '/* NULL \*\/',
-          'line' => ' /* NULL \*\/ { $$ = (OP*)NULL; } ',
-          'raw_rule' => '  ',
-          'rule' => ''
-        },
-        {
-          'code' => '{ $$ = op_append_list(OP_LINESEQ, $1, $2) PL_pad_reset_pending = TRUE if ($1 && $2) PL_hints |= HINT_BLOCK_SCOPE } ',
-          'comment' => '',
-          'line' => ' formstmtseq formline { $$ = op_append_list(OP_LINESEQ, $1, $2) PL_pad_reset_pending = TRUE if ($1 && $2) PL_hints |= HINT_BLOCK_SCOPE } ',
-          'raw_rule' => ' formstmtseq formline ',
-          'rule' => '<formstmtseq> <formline>'
-        }
-      ],
-      'sym' => 'formstmtseq',
-      'type' => 'nonterm'
-    };
-  */
-
-  "formstmtseq"    : [
-		       "",
-		       "<formstmtseq> <formline>",
 		     ],
   /*
     $fullstmt1 = {
@@ -980,59 +963,59 @@ grammar = {
           'rule' => '<FORMAT> <startformsub> <formname> <formblock>'
         },
         {
-          'code' => '{ if ($2->op_type == OP_CONST) { const char *const name = SvPV_nolen_const(((SVOP*)$2)->op_sv) if (strEQ(name, "BEGIN") || strEQ(name, "END") || strEQ(name, "INIT") || strEQ(name, "CHECK") || strEQ(name, "UNITCHECK")) CvSPECIAL_on(PL_compcv) } else /* State subs inside anonymous subs need to be clonable themselves. \*\/ if (CvANON(CvOUTSIDE(PL_compcv)) || CvCLONE(CvOUTSIDE(PL_compcv)) || !PadnameIsSTATE(PadlistNAMESARRAY(CvPADLIST( CvOUTSIDE(PL_compcv) ))[$2->op_targ])) CvCLONE_on(PL_compcv) parser->in_my = 0 parser->in_my_stash = NULL } { SvREFCNT_inc_simple_void(PL_compcv) $2->op_type == OP_CONST ? newATTRSUB($3, $2, $5, $6, $7) : newMYSUB($3, $2, $5, $6, $7) $$ = (OP*)NULL intro_my() parser->parsed_sub = 1 } ',
-          'comment' => '',
+          'code' => '{ if ($2->op_type == OP_CONST) { const char *const name = SvPV_nolen_const(((SVOP*)$2)->op_sv) if (strEQ(name, "BEGIN") || strEQ(name, "END") || strEQ(name, "INIT") || strEQ(name, "CHECK") || strEQ(name, "UNITCHECK")) CvSPECIAL_on(PL_compcv) } else / if (CvANON(CvOUTSIDE(PL_compcv)) || CvCLONE(CvOUTSIDE(PL_compcv)) || !PadnameIsSTATE(PadlistNAMESARRAY(CvPADLIST( CvOUTSIDE(PL_compcv) ))[$2->op_targ])) CvCLONE_on(PL_compcv) parser->in_my = 0 parser->in_my_stash = NULL } { SvREFCNT_inc_simple_void(PL_compcv) $2->op_type == OP_CONST ? newATTRSUB($3, $2, $5, $6, $7) : newMYSUB($3, $2, $5, $6, $7) $$ = (OP*)NULL intro_my() parser->parsed_sub = 1 } ',
+          'comment' => '/* State subs inside anonymous subs need to be clonable themselves. \*\/',
           'line' => ' SUB subname startsub { if ($2->op_type == OP_CONST) { const char *const name = SvPV_nolen_const(((SVOP*)$2)->op_sv) if (strEQ(name, "BEGIN") || strEQ(name, "END") || strEQ(name, "INIT") || strEQ(name, "CHECK") || strEQ(name, "UNITCHECK")) CvSPECIAL_on(PL_compcv) } else /* State subs inside anonymous subs need to be clonable themselves. \*\/ if (CvANON(CvOUTSIDE(PL_compcv)) || CvCLONE(CvOUTSIDE(PL_compcv)) || !PadnameIsSTATE(PadlistNAMESARRAY(CvPADLIST( CvOUTSIDE(PL_compcv) ))[$2->op_targ])) CvCLONE_on(PL_compcv) parser->in_my = 0 parser->in_my_stash = NULL } proto subattrlist optsubbody { SvREFCNT_inc_simple_void(PL_compcv) $2->op_type == OP_CONST ? newATTRSUB($3, $2, $5, $6, $7) : newMYSUB($3, $2, $5, $6, $7) $$ = (OP*)NULL intro_my() parser->parsed_sub = 1 } ',
           'raw_rule' => ' SUB subname startsub  proto subattrlist optsubbody ',
           'rule' => '<SUB> <subname> <startsub> <proto> <subattrlist> <optsubbody>'
         },
         {
-          'code' => '{ if ($2->op_type == OP_CONST) { const char *const name = SvPV_nolen_const(((SVOP*)$2)->op_sv) if (strEQ(name, "BEGIN") || strEQ(name, "END") || strEQ(name, "INIT") || strEQ(name, "CHECK") || strEQ(name, "UNITCHECK")) CvSPECIAL_on(PL_compcv) } else /* State subs inside anonymous subs need to be clonable themselves. \*\/ if (CvANON(CvOUTSIDE(PL_compcv)) || CvCLONE(CvOUTSIDE(PL_compcv)) || !PadnameIsSTATE(PadlistNAMESARRAY(CvPADLIST( CvOUTSIDE(PL_compcv) ))[$2->op_targ])) CvCLONE_on(PL_compcv) parser->in_my = 0 parser->in_my_stash = NULL } {\' stmtseq \'} { OP *body if (parser->copline > (line_t)$8) parser->copline = (line_t)$8 body = block_end($5, op_append_list(OP_LINESEQ, $6, $9)) SvREFCNT_inc_simple_void(PL_compcv) $2->op_type == OP_CONST ? newATTRSUB($3, $2, NULL, $7, body) : newMYSUB($3, $2, NULL, $7, body) $$ = (OP*)NULL intro_my() parser->parsed_sub = 1 } ',
-          'comment' => '',
+          'code' => '{ if ($2->op_type == OP_CONST) { const char *const name = SvPV_nolen_const(((SVOP*)$2)->op_sv) if (strEQ(name, "BEGIN") || strEQ(name, "END") || strEQ(name, "INIT") || strEQ(name, "CHECK") || strEQ(name, "UNITCHECK")) CvSPECIAL_on(PL_compcv) } else / if (CvANON(CvOUTSIDE(PL_compcv)) || CvCLONE(CvOUTSIDE(PL_compcv)) || !PadnameIsSTATE(PadlistNAMESARRAY(CvPADLIST( CvOUTSIDE(PL_compcv) ))[$2->op_targ])) CvCLONE_on(PL_compcv) parser->in_my = 0 parser->in_my_stash = NULL } { OP *body if (parser->copline > (line_t)$8) parser->copline = (line_t)$8 body = block_end($5, op_append_list(OP_LINESEQ, $6, $9)) SvREFCNT_inc_simple_void(PL_compcv) $2->op_type == OP_CONST ? newATTRSUB($3, $2, NULL, $7, body) : newMYSUB($3, $2, NULL, $7, body) $$ = (OP*)NULL intro_my() parser->parsed_sub = 1 } ',
+          'comment' => '/* State subs inside anonymous subs need to be clonable themselves. \*\/',
           'line' => ' SUB subname startsub { if ($2->op_type == OP_CONST) { const char *const name = SvPV_nolen_const(((SVOP*)$2)->op_sv) if (strEQ(name, "BEGIN") || strEQ(name, "END") || strEQ(name, "INIT") || strEQ(name, "CHECK") || strEQ(name, "UNITCHECK")) CvSPECIAL_on(PL_compcv) } else /* State subs inside anonymous subs need to be clonable themselves. \*\/ if (CvANON(CvOUTSIDE(PL_compcv)) || CvCLONE(CvOUTSIDE(PL_compcv)) || !PadnameIsSTATE(PadlistNAMESARRAY(CvPADLIST( CvOUTSIDE(PL_compcv) ))[$2->op_targ])) CvCLONE_on(PL_compcv) parser->in_my = 0 parser->in_my_stash = NULL } remember subsignature subattrlist \'{\' stmtseq \'}\' { OP *body if (parser->copline > (line_t)$8) parser->copline = (line_t)$8 body = block_end($5, op_append_list(OP_LINESEQ, $6, $9)) SvREFCNT_inc_simple_void(PL_compcv) $2->op_type == OP_CONST ? newATTRSUB($3, $2, NULL, $7, body) : newMYSUB($3, $2, NULL, $7, body) $$ = (OP*)NULL intro_my() parser->parsed_sub = 1 } ',
-          'raw_rule' => ' SUB subname startsub  remember subsignature subattrlist \'\' ',
-          'rule' => '<SUB> <subname> <startsub> <remember> <subsignature> <subattrlist> '
+          'raw_rule' => ' SUB subname startsub  remember subsignature subattrlist { stmtseq } ',
+          'rule' => '<SUB> <subname> <startsub> <remember> <subsignature> <subattrlist> { <stmtseq> }'
         },
         {
           'code' => '{ package($3) if ($2) package_version($2) $$ = (OP*)NULL } ',
           'comment' => '',
           'line' => ' PACKAGE WORD WORD \';\' { package($3) if ($2) package_version($2) $$ = (OP*)NULL } ',
-          'raw_rule' => ' PACKAGE WORD WORD \';\' ',
+          'raw_rule' => ' PACKAGE WORD WORD ; ',
           'rule' => '<PACKAGE> <WORD> <WORD> ;'
         },
         {
-          'code' => '{ CvSPECIAL_on(PL_compcv); /* It\'s a BEGIN {} \*\/ } WORD WORD optlistexpr \';\' { SvREFCNT_inc_simple_void(PL_compcv) utilize($1, $2, $4, $5, $6) parser->parsed_sub = 1 $$ = (OP*)NULL }',
-          'comment' => '',
+          'code' => '{ CvSPECIAL_on(PL_compcv); / } { SvREFCNT_inc_simple_void(PL_compcv) utilize($1, $2, $4, $5, $6) parser->parsed_sub = 1 $$ = (OP*)NULL } ',
+          'comment' => '/* It\'s a BEGIN {} \*\/',
           'line' => ' USE startsub { CvSPECIAL_on(PL_compcv); /* It\'s a BEGIN {} \*\/ } WORD WORD optlistexpr \';\' { SvREFCNT_inc_simple_void(PL_compcv) utilize($1, $2, $4, $5, $6) parser->parsed_sub = 1 $$ = (OP*)NULL } ',
-          'raw_rule' => ' USE startsub ',
-          'rule' => '<USE> <startsub>'
+          'raw_rule' => ' USE startsub  WORD WORD optlistexpr ; ',
+          'rule' => '<USE> <startsub> <WORD> <WORD> <optlistexpr> ;'
         },
         {
           'code' => '{ $$ = block_end($3, newCONDOP(0, $4, op_scope($6), $7)) parser->copline = (line_t)$1 } ',
           'comment' => '',
           'line' => ' IF \'(\' remember mexpr \')\' mblock else { $$ = block_end($3, newCONDOP(0, $4, op_scope($6), $7)) parser->copline = (line_t)$1 } ',
-          'raw_rule' => ' IF \'(\' remember mexpr \')\' mblock else ',
+          'raw_rule' => ' IF ( remember mexpr ) mblock else ',
           'rule' => '<IF> ( <remember> <mexpr> ) <mblock> <else>'
         },
         {
           'code' => '{ $$ = block_end($3, newCONDOP(0, $4, op_scope($6), $7)) parser->copline = (line_t)$1 } ',
           'comment' => '',
           'line' => ' UNLESS \'(\' remember miexpr \')\' mblock else { $$ = block_end($3, newCONDOP(0, $4, op_scope($6), $7)) parser->copline = (line_t)$1 } ',
-          'raw_rule' => ' UNLESS \'(\' remember miexpr \')\' mblock else ',
+          'raw_rule' => ' UNLESS ( remember miexpr ) mblock else ',
           'rule' => '<UNLESS> ( <remember> <miexpr> ) <mblock> <else>'
         },
         {
           'code' => '{ const PADOFFSET offset = pad_findmy_pvs("$_", 0) $$ = block_end($3, newGIVENOP($4, op_scope($6), offset == NOT_IN_PAD || PAD_COMPNAME_FLAGS_isOUR(offset) ? 0 : offset)) parser->copline = (line_t)$1 } ',
           'comment' => '',
           'line' => ' GIVEN \'(\' remember mexpr \')\' mblock { const PADOFFSET offset = pad_findmy_pvs("$_", 0) $$ = block_end($3, newGIVENOP($4, op_scope($6), offset == NOT_IN_PAD || PAD_COMPNAME_FLAGS_isOUR(offset) ? 0 : offset)) parser->copline = (line_t)$1 } ',
-          'raw_rule' => ' GIVEN \'(\' remember mexpr \')\' mblock ',
+          'raw_rule' => ' GIVEN ( remember mexpr ) mblock ',
           'rule' => '<GIVEN> ( <remember> <mexpr> ) <mblock>'
         },
         {
           'code' => '{ $$ = block_end($3, newWHENOP($4, op_scope($6))); } ',
           'comment' => '',
           'line' => ' WHEN \'(\' remember mexpr \')\' mblock { $$ = block_end($3, newWHENOP($4, op_scope($6))); } ',
-          'raw_rule' => ' WHEN \'(\' remember mexpr \')\' mblock ',
+          'raw_rule' => ' WHEN ( remember mexpr ) mblock ',
           'rule' => '<WHEN> ( <remember> <mexpr> ) <mblock>'
         },
         {
@@ -1046,84 +1029,84 @@ grammar = {
           'code' => '{ $$ = block_end($3, newWHILEOP(0, 1, (LOOP*)(OP*)NULL, $4, $7, $8, $6)) parser->copline = (line_t)$1 } ',
           'comment' => '',
           'line' => ' WHILE \'(\' remember texpr \')\' mintro mblock cont { $$ = block_end($3, newWHILEOP(0, 1, (LOOP*)(OP*)NULL, $4, $7, $8, $6)) parser->copline = (line_t)$1 } ',
-          'raw_rule' => ' WHILE \'(\' remember texpr \')\' mintro mblock cont ',
+          'raw_rule' => ' WHILE ( remember texpr ) mintro mblock cont ',
           'rule' => '<WHILE> ( <remember> <texpr> ) <mintro> <mblock> <cont>'
         },
         {
           'code' => '{ $$ = block_end($3, newWHILEOP(0, 1, (LOOP*)(OP*)NULL, $4, $7, $8, $6)) parser->copline = (line_t)$1 } ',
           'comment' => '',
           'line' => ' UNTIL \'(\' remember iexpr \')\' mintro mblock cont { $$ = block_end($3, newWHILEOP(0, 1, (LOOP*)(OP*)NULL, $4, $7, $8, $6)) parser->copline = (line_t)$1 } ',
-          'raw_rule' => ' UNTIL \'(\' remember iexpr \')\' mintro mblock cont ',
+          'raw_rule' => ' UNTIL ( remember iexpr ) mintro mblock cont ',
           'rule' => '<UNTIL> ( <remember> <iexpr> ) <mintro> <mblock> <cont>'
         },
         {
           'code' => '{ parser->expect = XTERM; } { parser->expect = XTERM; } { OP *initop = $4 OP *forop = newWHILEOP(0, 1, (LOOP*)(OP*)NULL, scalar($7), $13, $11, $10) if (initop) { forop = op_prepend_elem(OP_LINESEQ, initop, op_append_elem(OP_LINESEQ, newOP(OP_UNSTACK, OPf_SPECIAL), forop)) } PL_hints |= HINT_BLOCK_SCOPE $$ = block_end($3, forop) parser->copline = (line_t)$1 } ',
           'comment' => '',
           'line' => ' FOR \'(\' remember mnexpr \';\' { parser->expect = XTERM; } texpr \';\' { parser->expect = XTERM; } mintro mnexpr \')\' mblock { OP *initop = $4 OP *forop = newWHILEOP(0, 1, (LOOP*)(OP*)NULL, scalar($7), $13, $11, $10) if (initop) { forop = op_prepend_elem(OP_LINESEQ, initop, op_append_elem(OP_LINESEQ, newOP(OP_UNSTACK, OPf_SPECIAL), forop)) } PL_hints |= HINT_BLOCK_SCOPE $$ = block_end($3, forop) parser->copline = (line_t)$1 } ',
-          'raw_rule' => ' FOR \'(\' remember mnexpr \';\'  texpr \';\'  mintro mnexpr \')\' mblock ',
+          'raw_rule' => ' FOR ( remember mnexpr ;  texpr ;  mintro mnexpr ) mblock ',
           'rule' => '<FOR> ( <remember> <mnexpr> ; <texpr> ; <mintro> <mnexpr> ) <mblock>'
         },
         {
           'code' => '{ $$ = block_end($3, newFOROP(0, $4, $6, $8, $9)) parser->copline = (line_t)$1 } ',
           'comment' => '',
           'line' => ' FOR MY remember my_scalar \'(\' mexpr \')\' mblock cont { $$ = block_end($3, newFOROP(0, $4, $6, $8, $9)) parser->copline = (line_t)$1 } ',
-          'raw_rule' => ' FOR MY remember my_scalar \'(\' mexpr \')\' mblock cont ',
+          'raw_rule' => ' FOR MY remember my_scalar ( mexpr ) mblock cont ',
           'rule' => '<FOR> <MY> <remember> <my_scalar> ( <mexpr> ) <mblock> <cont>'
         },
         {
           'code' => '{ $$ = block_end($4, newFOROP(0, op_lvalue($2, OP_ENTERLOOP), $5, $7, $8)) parser->copline = (line_t)$1 } ',
           'comment' => '',
           'line' => ' FOR scalar \'(\' remember mexpr \')\' mblock cont { $$ = block_end($4, newFOROP(0, op_lvalue($2, OP_ENTERLOOP), $5, $7, $8)) parser->copline = (line_t)$1 } ',
-          'raw_rule' => ' FOR scalar \'(\' remember mexpr \')\' mblock cont ',
+          'raw_rule' => ' FOR scalar ( remember mexpr ) mblock cont ',
           'rule' => '<FOR> <scalar> ( <remember> <mexpr> ) <mblock> <cont>'
         },
         {
           'code' => '{ parser->in_my = 0; $<opval>$ = my($5); } { $$ = block_end( $4, newFOROP(0, op_lvalue( newUNOP(OP_REFGEN, 0, $<opval>6), OP_ENTERLOOP), $8, $10, $11) ) parser->copline = (line_t)$1 } ',
           'comment' => '',
           'line' => ' FOR REFGEN MY remember my_var { parser->in_my = 0; $<opval>$ = my($5); } \'(\' mexpr \')\' mblock cont { $$ = block_end( $4, newFOROP(0, op_lvalue( newUNOP(OP_REFGEN, 0, $<opval>6), OP_ENTERLOOP), $8, $10, $11) ) parser->copline = (line_t)$1 } ',
-          'raw_rule' => ' FOR REFGEN MY remember my_var  \'(\' mexpr \')\' mblock cont ',
+          'raw_rule' => ' FOR REFGEN MY remember my_var  ( mexpr ) mblock cont ',
           'rule' => '<FOR> <REFGEN> <MY> <remember> <my_var> ( <mexpr> ) <mblock> <cont>'
         },
         {
           'code' => '{ $$ = block_end($5, newFOROP( 0, op_lvalue(newUNOP(OP_REFGEN, 0, $3), OP_ENTERLOOP), $6, $8, $9)) parser->copline = (line_t)$1 } ',
           'comment' => '',
           'line' => ' FOR REFGEN refgen_topic \'(\' remember mexpr \')\' mblock cont { $$ = block_end($5, newFOROP( 0, op_lvalue(newUNOP(OP_REFGEN, 0, $3), OP_ENTERLOOP), $6, $8, $9)) parser->copline = (line_t)$1 } ',
-          'raw_rule' => ' FOR REFGEN refgen_topic \'(\' remember mexpr \')\' mblock cont ',
+          'raw_rule' => ' FOR REFGEN refgen_topic ( remember mexpr ) mblock cont ',
           'rule' => '<FOR> <REFGEN> <refgen_topic> ( <remember> <mexpr> ) <mblock> <cont>'
         },
         {
           'code' => '{ $$ = block_end($3, newFOROP(0, (OP*)NULL, $4, $6, $7)) parser->copline = (line_t)$1 } ',
           'comment' => '',
           'line' => ' FOR \'(\' remember mexpr \')\' mblock cont { $$ = block_end($3, newFOROP(0, (OP*)NULL, $4, $6, $7)) parser->copline = (line_t)$1 } ',
-          'raw_rule' => ' FOR \'(\' remember mexpr \')\' mblock cont ',
+          'raw_rule' => ' FOR ( remember mexpr ) mblock cont ',
           'rule' => '<FOR> ( <remember> <mexpr> ) <mblock> <cont>'
         },
         {
-          'code' => '{ /* a block is a loop that happens once \*\/ $$ = newWHILEOP(0, 1, (LOOP*)(OP*)NULL, (OP*)NULL, $1, $2, 0) } ',
-          'comment' => '',
+          'code' => '{ / $$ = newWHILEOP(0, 1, (LOOP*)(OP*)NULL, (OP*)NULL, $1, $2, 0) } ',
+          'comment' => '/* a block is a loop that happens once \*\/',
           'line' => ' block cont { /* a block is a loop that happens once \*\/ $$ = newWHILEOP(0, 1, (LOOP*)(OP*)NULL, (OP*)NULL, $1, $2, 0) } ',
           'raw_rule' => ' block cont ',
           'rule' => '<block> <cont>'
         },
         {
-          'code' => '{\' remember { package($3) if ($2) { package_version($2) } } stmtseq \'} { /* a block is a loop that happens once \*\/ $$ = newWHILEOP(0, 1, (LOOP*)(OP*)NULL, (OP*)NULL, block_end($5, $7), (OP*)NULL, 0) if (parser->copline > (line_t)$4) parser->copline = (line_t)$4 } ',
-          'comment' => '',
+          'code' => '{ package($3) if ($2) { package_version($2) } } { / $$ = newWHILEOP(0, 1, (LOOP*)(OP*)NULL, (OP*)NULL, block_end($5, $7), (OP*)NULL, 0) if (parser->copline > (line_t)$4) parser->copline = (line_t)$4 } ',
+          'comment' => '/* a block is a loop that happens once \*\/',
           'line' => ' PACKAGE WORD WORD \'{\' remember { package($3) if ($2) { package_version($2) } } stmtseq \'}\' { /* a block is a loop that happens once \*\/ $$ = newWHILEOP(0, 1, (LOOP*)(OP*)NULL, (OP*)NULL, block_end($5, $7), (OP*)NULL, 0) if (parser->copline > (line_t)$4) parser->copline = (line_t)$4 } ',
-          'raw_rule' => ' PACKAGE WORD WORD \'\' ',
-          'rule' => '<PACKAGE> <WORD> <WORD> '
+          'raw_rule' => ' PACKAGE WORD WORD { remember  stmtseq } ',
+          'rule' => '<PACKAGE> <WORD> <WORD> { <remember> <stmtseq> }'
         },
         {
           'code' => '{ $$ = $1 } ',
           'comment' => '',
           'line' => ' sideff \';\' { $$ = $1 } ',
-          'raw_rule' => ' sideff \';\' ',
+          'raw_rule' => ' sideff ; ',
           'rule' => '<sideff> ;'
         },
         {
           'code' => '{ $$ = (OP*)NULL parser->copline = NOLINE } ',
           'comment' => '',
           'line' => ' \';\' { $$ = (OP*)NULL parser->copline = NOLINE } ',
-          'raw_rule' => ' \';\' ',
+          'raw_rule' => ' ; ',
           'rule' => ';'
         }
       ],
@@ -1136,9 +1119,9 @@ grammar = {
 		       "<PLUGSTMT>",
 		       "<FORMAT> <startformsub> <formname> <formblock>",
 		       "<SUB> <subname> <startsub> <proto> <subattrlist> <optsubbody>",
-		       "<SUB> <subname> <startsub> <remember> <subsignature> <subattrlist> ",
-		       "<PACKAGE> <WORD> <WORD>? ;",
-		       "<USE> <startsub> <WORD> <WORD>? <listexpr>?",
+		       "<SUB> <subname> <startsub> <remember> <subsignature> <subattrlist> { <stmtseq> }",
+		       "<PACKAGE> <WORD> <WORD> ;",
+		       "<USE> <startsub> <WORD> <WORD> <optlistexpr> ;",
 		       "<IF> ( <remember> <mexpr> ) <mblock> <else>",
 		       "<UNLESS> ( <remember> <miexpr> ) <mblock> <else>",
 		       "<GIVEN> ( <remember> <mexpr> ) <mblock>",
@@ -1153,55 +1136,380 @@ grammar = {
 		       "<FOR> <REFGEN> <refgen_topic> ( <remember> <mexpr> ) <mblock> <cont>",
 		       "<FOR> ( <remember> <mexpr> ) <mblock> <cont>",
 		       "<block> <cont>",
-		       "<PACKAGE> <WORD> <WORD>? { <remember> <stmtseq> }",
+		       "<PACKAGE> <WORD> <WORD> { <remember> <stmtseq> }",
 		       "<sideff> ;",
 		       ";",
 		     ],
   /*
-    $formline1 = {
+    $block1 = {
       'rules' => [
         {
-          'code' => '{ OP *list if ($2) { OP *term = $2 list = op_append_elem(OP_LIST, $1, term) } else { list = $1 } if (parser->copline == NOLINE) parser->copline = CopLINE(PL_curcop)-1 else parser->copline-- $$ = newSTATEOP(0, NULL, op_convert_list(OP_FORMLINE, 0, list)) } ',
+          'code' => '{ if (parser->copline > (line_t)$1) parser->copline = (line_t)$1 $$ = block_end($2, $3) } ',
           'comment' => '',
-          'line' => ' THING formarg { OP *list if ($2) { OP *term = $2 list = op_append_elem(OP_LIST, $1, term) } else { list = $1 } if (parser->copline == NOLINE) parser->copline = CopLINE(PL_curcop)-1 else parser->copline-- $$ = newSTATEOP(0, NULL, op_convert_list(OP_FORMLINE, 0, list)) } ',
-          'raw_rule' => ' THING formarg ',
-          'rule' => '<THING> <formarg>'
+          'line' => ' \'{\' remember stmtseq \'}\' { if (parser->copline > (line_t)$1) parser->copline = (line_t)$1 $$ = block_end($2, $3) } ',
+          'raw_rule' => ' { remember stmtseq } ',
+          'rule' => '{ <remember> <stmtseq> }'
         }
       ],
-      'sym' => 'formline',
+      'sym' => 'block',
       'type' => 'nonterm'
     };
   */
 
-  "formline"       : [
-		       "<THING> <formarg>",
+  "block"          : [
+		       "{ <remember> <stmtseq> }",
 		     ],
   /*
-    $formarg1 = {
+    $mblock1 = {
       'rules' => [
         {
-          'code' => '{ $$ = NULL; } ',
+          'code' => '{ if (parser->copline > (line_t)$1) parser->copline = (line_t)$1 $$ = block_end($2, $3) } ',
+          'comment' => '',
+          'line' => ' \'{\' mremember stmtseq \'}\' { if (parser->copline > (line_t)$1) parser->copline = (line_t)$1 $$ = block_end($2, $3) } ',
+          'raw_rule' => ' { mremember stmtseq } ',
+          'rule' => '{ <mremember> <stmtseq> }'
+        }
+      ],
+      'sym' => 'mblock',
+      'type' => 'nonterm'
+    };
+  */
+
+  "mblock"         : [
+		       "{ <mremember> <stmtseq> }",
+		     ],
+  /*
+    $else1 = {
+      'rules' => [
+        {
+          'code' => '{ $$ = (OP*)NULL; } ',
           'comment' => '/* NULL \*\/',
-          'line' => ' /* NULL \*\/ { $$ = NULL; } ',
+          'line' => ' /* NULL \*\/ { $$ = (OP*)NULL; } ',
           'raw_rule' => '  ',
           'rule' => ''
         },
         {
-          'code' => '{ $$ = op_unscope($2); } ',
+          'code' => '{ ($2)->op_flags |= OPf_PARENS $$ = op_scope($2) } ',
           'comment' => '',
-          'line' => ' FORMLBRACK stmtseq FORMRBRACK { $$ = op_unscope($2); } ',
-          'raw_rule' => ' FORMLBRACK stmtseq FORMRBRACK ',
-          'rule' => '<FORMLBRACK> <stmtseq> <FORMRBRACK>'
+          'line' => ' ELSE mblock { ($2)->op_flags |= OPf_PARENS $$ = op_scope($2) } ',
+          'raw_rule' => ' ELSE mblock ',
+          'rule' => '<ELSE> <mblock>'
+        },
+        {
+          'code' => '{ parser->copline = (line_t)$1 $$ = newCONDOP(0, newSTATEOP(OPf_SPECIAL,NULL,$3), op_scope($5), $6) PL_hints |= HINT_BLOCK_SCOPE } ',
+          'comment' => '',
+          'line' => ' ELSIF \'(\' mexpr \')\' mblock else { parser->copline = (line_t)$1 $$ = newCONDOP(0, newSTATEOP(OPf_SPECIAL,NULL,$3), op_scope($5), $6) PL_hints |= HINT_BLOCK_SCOPE } ',
+          'raw_rule' => ' ELSIF ( mexpr ) mblock else ',
+          'rule' => '<ELSIF> ( <mexpr> ) <mblock> <else>'
         }
       ],
-      'sym' => 'formarg',
+      'sym' => 'else',
       'type' => 'nonterm'
     };
   */
 
-  "formarg"        : [
+  "else"           : [
 		       "",
-		       "<FORMLBRACK> <stmtseq> <FORMRBRACK>",
+		       "<ELSE> <mblock>",
+		       "<ELSIF> ( <mexpr> ) <mblock> <else>",
+		     ],
+  /*
+    $expr1 = {
+      'rules' => [
+        {
+          'code' => '{ $$ = newLOGOP(OP_AND, 0, $1, $3); } ',
+          'comment' => '',
+          'line' => ' expr ANDOP expr { $$ = newLOGOP(OP_AND, 0, $1, $3); } ',
+          'raw_rule' => ' expr ANDOP expr ',
+          'rule' => '<expr> <ANDOP> <expr>'
+        },
+        {
+          'code' => '{ $$ = newLOGOP($2, 0, $1, $3); } ',
+          'comment' => '',
+          'line' => ' expr OROP expr { $$ = newLOGOP($2, 0, $1, $3); } ',
+          'raw_rule' => ' expr OROP expr ',
+          'rule' => '<expr> <OROP> <expr>'
+        },
+        {
+          'code' => '{ $$ = newLOGOP(OP_DOR, 0, $1, $3); } ',
+          'comment' => '',
+          'line' => ' expr DOROP expr { $$ = newLOGOP(OP_DOR, 0, $1, $3); } ',
+          'raw_rule' => ' expr DOROP expr ',
+          'rule' => '<expr> <DOROP> <expr>'
+        },
+        {
+          'code' => '',
+          'comment' => '',
+          'line' => ' listexpr %prec PREC_LOW ',
+          'raw_rule' => ' listexpr %prec PREC_LOW',
+          'rule' => '<listexpr> {prec PREC_LOW}'
+        }
+      ],
+      'sym' => 'expr',
+      'type' => 'nonterm'
+    };
+  */
+
+  "expr"           : [
+		       "<expr> <ANDOP> <expr>",
+		       "<expr> <OROP> <expr>",
+		       "<expr> <DOROP> <expr>",
+		       "<listexpr> {prec PREC_LOW}",
+		     ],
+  /*
+    $term1 = {
+      'sym' => 'term',
+      'type' => 'type'
+    };
+  */
+
+  "term"           : [
+		       /term/i,
+		     ],
+  /*
+    $subscripted1 = {
+      'rules' => [
+        {
+          'code' => '{ $$ = newBINOP(OP_GELEM, 0, $1, scalar($3)); } ',
+          'comment' => '/* *main::{something} \*\//* In this and all the hash accessors, \';\' is * provided by the tokeniser \*\/',
+          'line' => ' gelem \'{\' expr \';\' \'}\' /* *main::{something} \*\/ /* In this and all the hash accessors, \';\' is * provided by the tokeniser \*\/ { $$ = newBINOP(OP_GELEM, 0, $1, scalar($3)); } ',
+          'raw_rule' => ' gelem { expr ; }   ',
+          'rule' => '<gelem> { <expr> ; }'
+        },
+        {
+          'code' => '{ $$ = newBINOP(OP_AELEM, 0, oopsAV($1), scalar($3)) } ',
+          'comment' => '/* $array[$element] \*\/',
+          'line' => ' scalar \'[\' expr \']\' /* $array[$element] \*\/ { $$ = newBINOP(OP_AELEM, 0, oopsAV($1), scalar($3)) } ',
+          'raw_rule' => ' scalar [ expr ]  ',
+          'rule' => '<scalar> [ <expr> ]'
+        },
+        {
+          'code' => '{ $$ = newBINOP(OP_AELEM, 0, ref(newAVREF($1),OP_RV2AV), scalar($4)) } ',
+          'comment' => '/* somearef->[$element] \*\/',
+          'line' => ' term ARROW \'[\' expr \']\' /* somearef->[$element] \*\/ { $$ = newBINOP(OP_AELEM, 0, ref(newAVREF($1),OP_RV2AV), scalar($4)) } ',
+          'raw_rule' => ' term ARROW [ expr ]  ',
+          'rule' => '<term> <ARROW> [ <expr> ]'
+        },
+        {
+          'code' => '{ $$ = newBINOP(OP_AELEM, 0, ref(newAVREF($1),OP_RV2AV), scalar($3)) } ',
+          'comment' => '/* $foo->[$bar]->[$baz] \*\/',
+          'line' => ' subscripted \'[\' expr \']\' /* $foo->[$bar]->[$baz] \*\/ { $$ = newBINOP(OP_AELEM, 0, ref(newAVREF($1),OP_RV2AV), scalar($3)) } ',
+          'raw_rule' => ' subscripted [ expr ]  ',
+          'rule' => '<subscripted> [ <expr> ]'
+        },
+        {
+          'code' => '{ $$ = newBINOP(OP_HELEM, 0, oopsHV($1), jmaybe($3)) } ',
+          'comment' => '/* $foo{bar();} \*\/',
+          'line' => ' scalar \'{\' expr \';\' \'}\' /* $foo{bar();} \*\/ { $$ = newBINOP(OP_HELEM, 0, oopsHV($1), jmaybe($3)) } ',
+          'raw_rule' => ' scalar { expr ; }  ',
+          'rule' => '<scalar> { <expr> ; }'
+        },
+        {
+          'code' => '{ $$ = newBINOP(OP_HELEM, 0, ref(newHVREF($1),OP_RV2HV), jmaybe($4)); } ',
+          'comment' => '/* somehref->{bar();} \*\/',
+          'line' => ' term ARROW \'{\' expr \';\' \'}\' /* somehref->{bar();} \*\/ { $$ = newBINOP(OP_HELEM, 0, ref(newHVREF($1),OP_RV2HV), jmaybe($4)); } ',
+          'raw_rule' => ' term ARROW { expr ; }  ',
+          'rule' => '<term> <ARROW> { <expr> ; }'
+        },
+        {
+          'code' => '{ $$ = newBINOP(OP_HELEM, 0, ref(newHVREF($1),OP_RV2HV), jmaybe($3)); } ',
+          'comment' => '/* $foo->[bar]->{baz;} \*\/',
+          'line' => ' subscripted \'{\' expr \';\' \'}\' /* $foo->[bar]->{baz;} \*\/ { $$ = newBINOP(OP_HELEM, 0, ref(newHVREF($1),OP_RV2HV), jmaybe($3)); } ',
+          'raw_rule' => ' subscripted { expr ; }  ',
+          'rule' => '<subscripted> { <expr> ; }'
+        },
+        {
+          'code' => '{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED, newCVREF(0, scalar($1))); } ',
+          'comment' => '/* $subref->() \*\/',
+          'line' => ' term ARROW \'(\' \')\' /* $subref->() \*\/ { $$ = newUNOP(OP_ENTERSUB, OPf_STACKED, newCVREF(0, scalar($1))); } ',
+          'raw_rule' => ' term ARROW ( )  ',
+          'rule' => '<term> <ARROW> ( )'
+        },
+        {
+          'code' => '{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED, op_append_elem(OP_LIST, $4, newCVREF(0, scalar($1)))); } ',
+          'comment' => '/* $subref->(@args) \*\/',
+          'line' => ' term ARROW \'(\' expr \')\' /* $subref->(@args) \*\/ { $$ = newUNOP(OP_ENTERSUB, OPf_STACKED, op_append_elem(OP_LIST, $4, newCVREF(0, scalar($1)))); } ',
+          'raw_rule' => ' term ARROW ( expr )  ',
+          'rule' => '<term> <ARROW> ( <expr> )'
+        },
+        {
+          'code' => '{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED, op_append_elem(OP_LIST, $3, newCVREF(0, scalar($1)))); } ',
+          'comment' => '/* $foo->{bar}->(@args) \*\/',
+          'line' => ' subscripted \'(\' expr \')\' /* $foo->{bar}->(@args) \*\/ { $$ = newUNOP(OP_ENTERSUB, OPf_STACKED, op_append_elem(OP_LIST, $3, newCVREF(0, scalar($1)))); } ',
+          'raw_rule' => ' subscripted ( expr )  ',
+          'rule' => '<subscripted> ( <expr> )'
+        },
+        {
+          'code' => '{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED, newCVREF(0, scalar($1))); } ',
+          'comment' => '/* $foo->{bar}->() \*\/',
+          'line' => ' subscripted \'(\' \')\' /* $foo->{bar}->() \*\/ { $$ = newUNOP(OP_ENTERSUB, OPf_STACKED, newCVREF(0, scalar($1))); } ',
+          'raw_rule' => ' subscripted ( )  ',
+          'rule' => '<subscripted> ( )'
+        },
+        {
+          'code' => '{ $$ = newSLICEOP(0, $5, $2); } ',
+          'comment' => '/* list slice \*\/',
+          'line' => ' \'(\' expr \')\' \'[\' expr \']\' /* list slice \*\/ { $$ = newSLICEOP(0, $5, $2); } ',
+          'raw_rule' => ' ( expr ) [ expr ]  ',
+          'rule' => '( <expr> ) [ <expr> ]'
+        },
+        {
+          'code' => '{ $$ = newSLICEOP(0, $3, $1); } ',
+          'comment' => '/* list literal slice \*\/',
+          'line' => ' QWLIST \'[\' expr \']\' /* list literal slice \*\/ { $$ = newSLICEOP(0, $3, $1); } ',
+          'raw_rule' => ' QWLIST [ expr ]  ',
+          'rule' => '<QWLIST> [ <expr> ]'
+        },
+        {
+          'code' => '{ $$ = newSLICEOP(0, $4, (OP*)NULL); } ',
+          'comment' => '/* empty list slice! \*\//* Binary operators between terms \*\/',
+          'line' => ' \'(\' \')\' \'[\' expr \']\' /* empty list slice! \*\/ { $$ = newSLICEOP(0, $4, (OP*)NULL); } /* Binary operators between terms \*\/ ',
+          'raw_rule' => ' ( ) [ expr ]   ',
+          'rule' => '( ) [ <expr> ]'
+        }
+      ],
+      'sym' => 'subscripted',
+      'type' => 'nonterm'
+    };
+  */
+
+  "subscripted"    : [
+		       "<gelem> { <expr> ; }",
+		       "<scalar> [ <expr> ]",
+		       "<term> <ARROW> [ <expr> ]",
+		       "<subscripted> [ <expr> ]",
+		       "<scalar> { <expr> ; }",
+		       "<term> <ARROW> { <expr> ; }",
+		       "<subscripted> { <expr> ; }",
+		       "<term> <ARROW> ( )",
+		       "<term> <ARROW> ( <expr> )",
+		       "<subscripted> ( <expr> )",
+		       "<subscripted> ( )",
+		       "( <expr> ) [ <expr> ]",
+		       "<QWLIST> [ <expr> ]",
+		       "( ) [ <expr> ]",
+		     ],
+  /*
+    $scalar1 = {
+      'rules' => [
+        {
+          'code' => '{ $$ = newSVREF($2); } ',
+          'comment' => '',
+          'line' => ' \'$\' indirob { $$ = newSVREF($2); } ',
+          'raw_rule' => ' $ indirob ',
+          'rule' => '$ <indirob>'
+        }
+      ],
+      'sym' => 'scalar',
+      'type' => 'nonterm'
+    };
+  */
+
+  "scalar"         : [
+		       "$ <indirob>",
+		     ],
+  /*
+    $ary1 = {
+      'rules' => [
+        {
+          'code' => '{ $$ = newAVREF($2) if ($$) $$->op_private |= $1 } ',
+          'comment' => '',
+          'line' => ' \'@\' indirob { $$ = newAVREF($2) if ($$) $$->op_private |= $1 } ',
+          'raw_rule' => ' @ indirob ',
+          'rule' => '@ <indirob>'
+        }
+      ],
+      'sym' => 'ary',
+      'type' => 'nonterm'
+    };
+  */
+
+  "ary"            : [
+		       "@ <indirob>",
+		     ],
+  /*
+    $hsh1 = {
+      'rules' => [
+        {
+          'code' => '{ $$ = newHVREF($2) if ($$) $$->op_private |= $1 } ',
+          'comment' => '',
+          'line' => ' \'%\' indirob { $$ = newHVREF($2) if ($$) $$->op_private |= $1 } ',
+          'raw_rule' => ' % indirob ',
+          'rule' => '{ indirob}'
+        }
+      ],
+      'sym' => 'hsh',
+      'type' => 'nonterm'
+    };
+  */
+
+  "hsh"            : [
+		       "{ indirob}",
+		     ],
+  /*
+    $arylen1 = {
+      'rules' => [
+        {
+          'code' => '{ $$ = newAVREF($2); } ',
+          'comment' => '',
+          'line' => ' DOLSHARP indirob { $$ = newAVREF($2); } ',
+          'raw_rule' => ' DOLSHARP indirob ',
+          'rule' => '<DOLSHARP> <indirob>'
+        },
+        {
+          'code' => '{ $$ = newAVREF($1); } ',
+          'comment' => '',
+          'line' => ' term ARROW DOLSHARP \'*\' { $$ = newAVREF($1); } ',
+          'raw_rule' => ' term ARROW DOLSHARP * ',
+          'rule' => '<term> <ARROW> <DOLSHARP> *'
+        }
+      ],
+      'sym' => 'arylen',
+      'type' => 'nonterm'
+    };
+  */
+
+  "arylen"         : [
+		       "<DOLSHARP> <indirob>",
+		       "<term> <ARROW> <DOLSHARP> *",
+		     ],
+  /*
+    $star1 = {
+      'rules' => [
+        {
+          'code' => '{ $$ = newGVREF(0,$2); } ',
+          'comment' => '',
+          'line' => ' \'*\' indirob { $$ = newGVREF(0,$2); } ',
+          'raw_rule' => ' * indirob ',
+          'rule' => '* <indirob>'
+        }
+      ],
+      'sym' => 'star',
+      'type' => 'nonterm'
+    };
+  */
+
+  "star"           : [
+		       "* <indirob>",
+		     ],
+  /*
+    $amper1 = {
+      'rules' => [
+        {
+          'code' => '{ $$ = newCVREF($1,$2); } ',
+          'comment' => '',
+          'line' => ' \'&\' indirob { $$ = newCVREF($1,$2); } ',
+          'raw_rule' => ' & indirob ',
+          'rule' => '& <indirob>'
+        }
+      ],
+      'sym' => 'amper',
+      'type' => 'nonterm'
+    };
+  */
+
+  "amper"          : [
+		       "& <indirob>",
 		     ],
   /*
     $sideff1 = {
@@ -1279,85 +1587,120 @@ grammar = {
 		       "<expr> <WHEN> <expr>",
 		     ],
   /*
-    $else1 = {
+    $sliceme1 = {
       'rules' => [
         {
-          'code' => '{ $$ = (OP*)NULL; } ',
-          'comment' => '/* NULL \*\/',
-          'line' => ' /* NULL \*\/ { $$ = (OP*)NULL; } ',
-          'raw_rule' => '  ',
-          'rule' => ''
+          'code' => '',
+          'comment' => '',
+          'line' => ' ary ',
+          'raw_rule' => ' ary',
+          'rule' => '<ary>'
         },
         {
-          'code' => '{ ($2)->op_flags |= OPf_PARENS $$ = op_scope($2) } ',
+          'code' => '{ $$ = newAVREF($1); } ',
           'comment' => '',
-          'line' => ' ELSE mblock { ($2)->op_flags |= OPf_PARENS $$ = op_scope($2) } ',
-          'raw_rule' => ' ELSE mblock ',
-          'rule' => '<ELSE> <mblock>'
-        },
-        {
-          'code' => '{ parser->copline = (line_t)$1 $$ = newCONDOP(0, newSTATEOP(OPf_SPECIAL,NULL,$3), op_scope($5), $6) PL_hints |= HINT_BLOCK_SCOPE } ',
-          'comment' => '',
-          'line' => ' ELSIF \'(\' mexpr \')\' mblock else { parser->copline = (line_t)$1 $$ = newCONDOP(0, newSTATEOP(OPf_SPECIAL,NULL,$3), op_scope($5), $6) PL_hints |= HINT_BLOCK_SCOPE } ',
-          'raw_rule' => ' ELSIF \'(\' mexpr \')\' mblock else ',
-          'rule' => '<ELSIF> ( <mexpr> ) <mblock> <else>'
+          'line' => ' term ARROW \'@\' { $$ = newAVREF($1); } ',
+          'raw_rule' => ' term ARROW @ ',
+          'rule' => '<term> <ARROW> @'
         }
       ],
-      'sym' => 'else',
+      'sym' => 'sliceme',
       'type' => 'nonterm'
     };
   */
 
-  "else"           : [
-		       "",
-		       "<ELSE> <mblock>",
-		       "<ELSIF> ( <mexpr> ) <mblock> <else>",
+  "sliceme"        : [
+		       "<ary>",
+		       "<term> <ARROW> @",
 		     ],
   /*
-    $cont1 = {
+    $kvslice1 = {
       'rules' => [
         {
-          'code' => '{ $$ = (OP*)NULL; } ',
-          'comment' => '/* NULL \*\/',
-          'line' => ' /* NULL \*\/ { $$ = (OP*)NULL; } ',
-          'raw_rule' => '  ',
-          'rule' => ''
+          'code' => '',
+          'comment' => '',
+          'line' => ' hsh ',
+          'raw_rule' => ' hsh',
+          'rule' => '<hsh>'
         },
         {
-          'code' => '{ $$ = op_scope($2); } ',
+          'code' => '{ $$ = newHVREF($1); } ',
           'comment' => '',
-          'line' => ' CONTINUE block { $$ = op_scope($2); } ',
-          'raw_rule' => ' CONTINUE block ',
-          'rule' => '<CONTINUE> <block>'
+          'line' => ' term ARROW \'%\' { $$ = newHVREF($1); } ',
+          'raw_rule' => ' term ARROW % ',
+          'rule' => '<term> <ARROW> { }'
         }
       ],
-      'sym' => 'cont',
+      'sym' => 'kvslice',
       'type' => 'nonterm'
     };
   */
 
-  "cont"           : [
-		       "",
-		       "<CONTINUE> <block>",
+  "kvslice"        : [
+		       "<hsh>",
+		       "<term> <ARROW> { }",
 		     ],
   /*
-    $mintro1 = {
+    $gelem1 = {
       'rules' => [
         {
-          'code' => '{ $$ = (PL_min_intro_pending && PL_max_intro_pending >= PL_min_intro_pending) intro_my(); } ',
-          'comment' => '/* NULL \*\//* Normal expression \*\/',
-          'line' => ' /* NULL \*\/ { $$ = (PL_min_intro_pending && PL_max_intro_pending >= PL_min_intro_pending) intro_my(); } /* Normal expression \*\/ ',
-          'raw_rule' => '   ',
-          'rule' => ''
+          'code' => '',
+          'comment' => '',
+          'line' => ' star ',
+          'raw_rule' => ' star',
+          'rule' => '<star>'
+        },
+        {
+          'code' => '{ $$ = newGVREF(0,$1); } ',
+          'comment' => '',
+          'line' => ' term ARROW \'*\' { $$ = newGVREF(0,$1); } ',
+          'raw_rule' => ' term ARROW * ',
+          'rule' => '<term> <ARROW> *'
         }
       ],
-      'sym' => 'mintro',
+      'sym' => 'gelem',
       'type' => 'nonterm'
     };
   */
 
-  "mintro"         : [
-		       "",
+  "gelem"          : [
+		       "<star>",
+		       "<term> <ARROW> *",
+		     ],
+  /*
+    $listexpr1 = {
+      'rules' => [
+        {
+          'code' => '{ $$ = $1; } ',
+          'comment' => '',
+          'line' => ' listexpr \',\' { $$ = $1; } ',
+          'raw_rule' => ' listexpr , ',
+          'rule' => '<listexpr> ,'
+        },
+        {
+          'code' => '{ OP* term = $3 $$ = op_append_elem(OP_LIST, $1, term) } ',
+          'comment' => '',
+          'line' => ' listexpr \',\' term { OP* term = $3 $$ = op_append_elem(OP_LIST, $1, term) } ',
+          'raw_rule' => ' listexpr , term ',
+          'rule' => '<listexpr> , <term>'
+        },
+        {
+          'code' => '',
+          'comment' => '',
+          'line' => ' term %prec PREC_LOW ',
+          'raw_rule' => ' term %prec PREC_LOW',
+          'rule' => '<term> {prec PREC_LOW}'
+        }
+      ],
+      'sym' => 'listexpr',
+      'type' => 'nonterm'
+    };
+  */
+
+  "listexpr"       : [
+		       "<listexpr> ,",
+		       "<listexpr> , <term>",
+		       "<term> {prec PREC_LOW}",
 		     ],
   /*
     $nexpr1 = {
@@ -1490,6 +1833,240 @@ grammar = {
 		       "<iexpr>",
 		     ],
   /*
+    $optlistexpr1 = {
+      'rules' => [
+        {
+          'code' => '{ $$ = (OP*)NULL; } ',
+          'comment' => '/* NULL \*\/',
+          'line' => ' /* NULL \*\/ %prec PREC_LOW { $$ = (OP*)NULL; } ',
+          'raw_rule' => '  %prec PREC_LOW ',
+          'rule' => '{prec PREC_LOW}'
+        },
+        {
+          'code' => '{ $$ = $1; } ',
+          'comment' => '',
+          'line' => ' listexpr %prec PREC_LOW { $$ = $1; } ',
+          'raw_rule' => ' listexpr %prec PREC_LOW ',
+          'rule' => '<listexpr> {prec PREC_LOW}'
+        }
+      ],
+      'sym' => 'optlistexpr',
+      'type' => 'nonterm'
+    };
+  */
+
+  "optlistexpr"    : [
+		       "{prec PREC_LOW}",
+		       "<listexpr> {prec PREC_LOW}",
+		     ],
+  /*
+    $optexpr1 = {
+      'rules' => [
+        {
+          'code' => '{ $$ = (OP*)NULL; } ',
+          'comment' => '/* NULL \*\/',
+          'line' => ' /* NULL \*\/ { $$ = (OP*)NULL; } ',
+          'raw_rule' => '  ',
+          'rule' => ''
+        },
+        {
+          'code' => '{ $$ = $1; } ',
+          'comment' => '',
+          'line' => ' expr { $$ = $1; } ',
+          'raw_rule' => ' expr ',
+          'rule' => '<expr>'
+        }
+      ],
+      'sym' => 'optexpr',
+      'type' => 'nonterm'
+    };
+  */
+
+  "optexpr"        : [
+		       "",
+		       "<expr>",
+		     ],
+  /*
+    $optrepl1 = {
+      'rules' => [
+        {
+          'code' => '{ $$ = (OP*)NULL; } ',
+          'comment' => '/* NULL \*\/',
+          'line' => ' /* NULL \*\/ { $$ = (OP*)NULL; } ',
+          'raw_rule' => '  ',
+          'rule' => ''
+        },
+        {
+          'code' => '{ $$ = $2; } ',
+          'comment' => '',
+          'line' => ' \'/\' expr { $$ = $2; } ',
+          'raw_rule' => ' / expr ',
+          'rule' => '/ <expr>'
+        }
+      ],
+      'sym' => 'optrepl',
+      'type' => 'nonterm'
+    };
+  */
+
+  "optrepl"        : [
+		       "",
+		       "/ <expr>",
+		     ],
+  /*
+    $indirob1 = {
+      'rules' => [
+        {
+          'code' => '{ $$ = scalar($1); } ',
+          'comment' => '',
+          'line' => ' WORD { $$ = scalar($1); } ',
+          'raw_rule' => ' WORD ',
+          'rule' => '<WORD>'
+        },
+        {
+          'code' => '{ $$ = scalar($1); } ',
+          'comment' => '',
+          'line' => ' scalar %prec PREC_LOW { $$ = scalar($1); } ',
+          'raw_rule' => ' scalar %prec PREC_LOW ',
+          'rule' => '<scalar> {prec PREC_LOW}'
+        },
+        {
+          'code' => '{ $$ = op_scope($1); } ',
+          'comment' => '',
+          'line' => ' block { $$ = op_scope($1); } ',
+          'raw_rule' => ' block ',
+          'rule' => '<block>'
+        },
+        {
+          'code' => '{ $$ = $1; } ',
+          'comment' => '',
+          'line' => ' PRIVATEREF { $$ = $1; } ',
+          'raw_rule' => ' PRIVATEREF ',
+          'rule' => '<PRIVATEREF>'
+        }
+      ],
+      'sym' => 'indirob',
+      'type' => 'nonterm'
+    };
+  */
+
+  "indirob"        : [
+		       "<WORD>",
+		       "<scalar> {prec PREC_LOW}",
+		       "<block>",
+		       "<PRIVATEREF>",
+		     ],
+  /*
+    $listop1 = {
+      'rules' => [
+        {
+          'code' => '{ $$ = op_convert_list($1, OPf_STACKED, op_prepend_elem(OP_LIST, newGVREF($1,$2), $3) ) } ',
+          'comment' => '/* map {...} @args or print $fh @args \*\/',
+          'line' => ' LSTOP indirob listexpr /* map {...} @args or print $fh @args \*\/ { $$ = op_convert_list($1, OPf_STACKED, op_prepend_elem(OP_LIST, newGVREF($1,$2), $3) ) } ',
+          'raw_rule' => ' LSTOP indirob listexpr  ',
+          'rule' => '<LSTOP> <indirob> <listexpr>'
+        },
+        {
+          'code' => '{ $$ = op_convert_list($1, OPf_STACKED, op_prepend_elem(OP_LIST, newGVREF($1,$3), $4) ) } ',
+          'comment' => '/* print ($fh @args \*\/',
+          'line' => ' FUNC \'(\' indirob expr \')\' /* print ($fh @args \*\/ { $$ = op_convert_list($1, OPf_STACKED, op_prepend_elem(OP_LIST, newGVREF($1,$3), $4) ) } ',
+          'raw_rule' => ' FUNC ( indirob expr )  ',
+          'rule' => '<FUNC> ( <indirob> <expr> )'
+        },
+        {
+          'code' => '{ $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED, op_append_elem(OP_LIST, op_prepend_elem(OP_LIST, scalar($1), $5), newMETHOP(OP_METHOD, 0, $3))) } ',
+          'comment' => '/* $foo->bar(list) \*\/',
+          'line' => ' term ARROW method \'(\' optexpr \')\' /* $foo->bar(list) \*\/ { $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED, op_append_elem(OP_LIST, op_prepend_elem(OP_LIST, scalar($1), $5), newMETHOP(OP_METHOD, 0, $3))) } ',
+          'raw_rule' => ' term ARROW method ( optexpr )  ',
+          'rule' => '<term> <ARROW> <method> ( <optexpr> )'
+        },
+        {
+          'code' => '{ $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED, op_append_elem(OP_LIST, scalar($1), newMETHOP(OP_METHOD, 0, $3))) } ',
+          'comment' => '/* $foo->bar \*\/',
+          'line' => ' term ARROW method /* $foo->bar \*\/ { $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED, op_append_elem(OP_LIST, scalar($1), newMETHOP(OP_METHOD, 0, $3))) } ',
+          'raw_rule' => ' term ARROW method  ',
+          'rule' => '<term> <ARROW> <method>'
+        },
+        {
+          'code' => '{ $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED, op_append_elem(OP_LIST, op_prepend_elem(OP_LIST, $2, $3), newMETHOP(OP_METHOD, 0, $1))) } ',
+          'comment' => '/* new Class @args \*\/',
+          'line' => ' METHOD indirob optlistexpr /* new Class @args \*\/ { $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED, op_append_elem(OP_LIST, op_prepend_elem(OP_LIST, $2, $3), newMETHOP(OP_METHOD, 0, $1))) } ',
+          'raw_rule' => ' METHOD indirob optlistexpr  ',
+          'rule' => '<METHOD> <indirob> <optlistexpr>'
+        },
+        {
+          'code' => '{ $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED, op_append_elem(OP_LIST, op_prepend_elem(OP_LIST, $2, $4), newMETHOP(OP_METHOD, 0, $1))) } ',
+          'comment' => '/* method $object (@args) \*\/',
+          'line' => ' FUNCMETH indirob \'(\' optexpr \')\' /* method $object (@args) \*\/ { $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED, op_append_elem(OP_LIST, op_prepend_elem(OP_LIST, $2, $4), newMETHOP(OP_METHOD, 0, $1))) } ',
+          'raw_rule' => ' FUNCMETH indirob ( optexpr )  ',
+          'rule' => '<FUNCMETH> <indirob> ( <optexpr> )'
+        },
+        {
+          'code' => '{ $$ = op_convert_list($1, 0, $2); } ',
+          'comment' => '/* print @args \*\/',
+          'line' => ' LSTOP optlistexpr /* print @args \*\/ { $$ = op_convert_list($1, 0, $2); } ',
+          'raw_rule' => ' LSTOP optlistexpr  ',
+          'rule' => '<LSTOP> <optlistexpr>'
+        },
+        {
+          'code' => '{ $$ = op_convert_list($1, 0, $3); } ',
+          'comment' => '/* print (@args) \*\/',
+          'line' => ' FUNC \'(\' optexpr \')\' /* print (@args) \*\/ { $$ = op_convert_list($1, 0, $3); } ',
+          'raw_rule' => ' FUNC ( optexpr )  ',
+          'rule' => '<FUNC> ( <optexpr> )'
+        },
+        {
+          'code' => '{ SvREFCNT_inc_simple_void(PL_compcv) $<opval>$ = newANONATTRSUB($2, 0, (OP*)NULL, $3); } { $$ = newUNOP(OP_ENTERSUB, OPf_STACKED, op_append_elem(OP_LIST, op_prepend_elem(OP_LIST, $<opval>4, $5), $1)) } ',
+          'comment' => '/* sub f(&@); f { foo } ... \*\//* ... @bar \*\/',
+          'line' => ' LSTOPSUB startanonsub block /* sub f(&@); f { foo } ... \*\/ { SvREFCNT_inc_simple_void(PL_compcv) $<opval>$ = newANONATTRSUB($2, 0, (OP*)NULL, $3); } optlistexpr %prec LSTOP /* ... @bar \*\/ { $$ = newUNOP(OP_ENTERSUB, OPf_STACKED, op_append_elem(OP_LIST, op_prepend_elem(OP_LIST, $<opval>4, $5), $1)) } ',
+          'raw_rule' => ' LSTOPSUB startanonsub block   optlistexpr %prec LSTOP  ',
+          'rule' => '<LSTOPSUB> <startanonsub> <block> <optlistexpr> {prec LSTOP}'
+        }
+      ],
+      'sym' => 'listop',
+      'type' => 'nonterm'
+    };
+  */
+
+  "listop"         : [
+		       "<LSTOP> <indirob> <listexpr>",
+		       "<FUNC> ( <indirob> <expr> )",
+		       "<term> <ARROW> <method> ( <optexpr> )",
+		       "<term> <ARROW> <method>",
+		       "<METHOD> <indirob> <optlistexpr>",
+		       "<FUNCMETH> <indirob> ( <optexpr> )",
+		       "<LSTOP> <optlistexpr>",
+		       "<FUNC> ( <optexpr> )",
+		       "<LSTOPSUB> <startanonsub> <block> <optlistexpr> {prec LSTOP}",
+		     ],
+  /*
+    $method1 = {
+      'rules' => [
+        {
+          'code' => '',
+          'comment' => '',
+          'line' => ' METHOD ',
+          'raw_rule' => ' METHOD',
+          'rule' => '<METHOD>'
+        },
+        {
+          'code' => '',
+          'comment' => '',
+          'line' => ' scalar ',
+          'raw_rule' => ' scalar',
+          'rule' => '<scalar>'
+        }
+      ],
+      'sym' => 'method',
+      'type' => 'nonterm'
+    };
+  */
+
+  "method"         : [
+		       "<METHOD>",
+		       "<scalar>",
+		     ],
+  /*
     $formname1 = {
       'rules' => [
         {
@@ -1514,63 +2091,6 @@ grammar = {
 
   "formname"       : [
 		       "<WORD>",
-		       "",
-		     ],
-  /*
-    $startsub1 = {
-      'rules' => [
-        {
-          'code' => '{ $$ = start_subparse(FALSE, 0) SAVEFREESV(PL_compcv); } ',
-          'comment' => '/* NULL \*\//* start a regular subroutine scope \*\/',
-          'line' => ' /* NULL \*\/ /* start a regular subroutine scope \*\/ { $$ = start_subparse(FALSE, 0) SAVEFREESV(PL_compcv); } ',
-          'raw_rule' => '   ',
-          'rule' => ''
-        }
-      ],
-      'sym' => 'startsub',
-      'type' => 'nonterm'
-    };
-  */
-
-  "startsub"       : [
-		       "",
-		     ],
-  /*
-    $startanonsub1 = {
-      'rules' => [
-        {
-          'code' => '{ $$ = start_subparse(FALSE, CVf_ANON) SAVEFREESV(PL_compcv); } ',
-          'comment' => '/* NULL \*\//* start an anonymous subroutine scope \*\/',
-          'line' => ' /* NULL \*\/ /* start an anonymous subroutine scope \*\/ { $$ = start_subparse(FALSE, CVf_ANON) SAVEFREESV(PL_compcv); } ',
-          'raw_rule' => '   ',
-          'rule' => ''
-        }
-      ],
-      'sym' => 'startanonsub',
-      'type' => 'nonterm'
-    };
-  */
-
-  "startanonsub"   : [
-		       "",
-		     ],
-  /*
-    $startformsub1 = {
-      'rules' => [
-        {
-          'code' => '{ $$ = start_subparse(TRUE, 0) SAVEFREESV(PL_compcv); } ',
-          'comment' => '/* NULL \*\//* start a format subroutine scope \*\/',
-          'line' => ' /* NULL \*\/ /* start a format subroutine scope \*\/ { $$ = start_subparse(TRUE, 0) SAVEFREESV(PL_compcv); } ',
-          'raw_rule' => '   ',
-          'rule' => ''
-        }
-      ],
-      'sym' => 'startformsub',
-      'type' => 'nonterm'
-    };
-  */
-
-  "startformsub"   : [
 		       "",
 		     ],
   /*
@@ -1626,6 +2146,160 @@ grammar = {
   "proto"          : [
 		       "",
 		       "<THING>",
+		     ],
+  /*
+    $optsubbody1 = {
+      'rules' => [
+        {
+          'code' => '',
+          'comment' => '',
+          'line' => ' block ',
+          'raw_rule' => ' block',
+          'rule' => '<block>'
+        },
+        {
+          'code' => '{ $$ = (OP*)NULL; } ',
+          'comment' => '',
+          'line' => ' \';\' { $$ = (OP*)NULL; } ',
+          'raw_rule' => ' ; ',
+          'rule' => ';'
+        }
+      ],
+      'sym' => 'optsubbody',
+      'type' => 'nonterm'
+    };
+  */
+
+  "optsubbody"     : [
+		       "<block>",
+		       ";",
+		     ],
+  /*
+    $cont1 = {
+      'rules' => [
+        {
+          'code' => '{ $$ = (OP*)NULL; } ',
+          'comment' => '/* NULL \*\/',
+          'line' => ' /* NULL \*\/ { $$ = (OP*)NULL; } ',
+          'raw_rule' => '  ',
+          'rule' => ''
+        },
+        {
+          'code' => '{ $$ = op_scope($2); } ',
+          'comment' => '',
+          'line' => ' CONTINUE block { $$ = op_scope($2); } ',
+          'raw_rule' => ' CONTINUE block ',
+          'rule' => '<CONTINUE> <block>'
+        }
+      ],
+      'sym' => 'cont',
+      'type' => 'nonterm'
+    };
+  */
+
+  "cont"           : [
+		       "",
+		       "<CONTINUE> <block>",
+		     ],
+  /*
+    $my_scalar1 = {
+      'rules' => [
+        {
+          'code' => '{ parser->in_my = 0; $$ = my($1); } ',
+          'comment' => '',
+          'line' => ' scalar { parser->in_my = 0; $$ = my($1); } ',
+          'raw_rule' => ' scalar ',
+          'rule' => '<scalar>'
+        }
+      ],
+      'sym' => 'my_scalar',
+      'type' => 'nonterm'
+    };
+  */
+
+  "my_scalar"      : [
+		       "<scalar>",
+		     ],
+  /*
+    $my_var1 = {
+      'rules' => [
+        {
+          'code' => '',
+          'comment' => '',
+          'line' => ' scalar ',
+          'raw_rule' => ' scalar',
+          'rule' => '<scalar>'
+        },
+        {
+          'code' => '',
+          'comment' => '',
+          'line' => ' ary ',
+          'raw_rule' => ' ary',
+          'rule' => '<ary>'
+        },
+        {
+          'code' => '',
+          'comment' => '',
+          'line' => ' hsh ',
+          'raw_rule' => ' hsh',
+          'rule' => '<hsh>'
+        }
+      ],
+      'sym' => 'my_var',
+      'type' => 'nonterm'
+    };
+  */
+
+  "my_var"         : [
+		       "<scalar>",
+		       "<ary>",
+		       "<hsh>",
+		     ],
+  /*
+    $refgen_topic1 = {
+      'rules' => [
+        {
+          'code' => '',
+          'comment' => '',
+          'line' => ' my_var ',
+          'raw_rule' => ' my_var',
+          'rule' => '<my_var>'
+        },
+        {
+          'code' => '',
+          'comment' => '',
+          'line' => ' amper ',
+          'raw_rule' => ' amper',
+          'rule' => '<amper>'
+        }
+      ],
+      'sym' => 'refgen_topic',
+      'type' => 'nonterm'
+    };
+  */
+
+  "refgen_topic"   : [
+		       "<my_var>",
+		       "<amper>",
+		     ],
+  /*
+    $formblock1 = {
+      'rules' => [
+        {
+          'code' => '{ if (parser->copline > (line_t)$1) parser->copline = (line_t)$1 $$ = block_end($2, $5) } ',
+          'comment' => '',
+          'line' => ' \'=\' remember \';\' FORMRBRACK formstmtseq \';\' \'.\' { if (parser->copline > (line_t)$1) parser->copline = (line_t)$1 $$ = block_end($2, $5) } ',
+          'raw_rule' => ' = remember ; FORMRBRACK formstmtseq ; . ',
+          'rule' => '= <remember> ; <FORMRBRACK> <formstmtseq> ; .'
+        }
+      ],
+      'sym' => 'formblock',
+      'type' => 'nonterm'
+    };
+  */
+
+  "formblock"      : [
+		       "= <remember> ; <FORMRBRACK> <formstmtseq> ; .",
 		     ],
   /*
     $subattrlist1 = {
@@ -1690,14 +2364,92 @@ grammar = {
 		       "<COLONATTR>",
 		     ],
   /*
+    $myattrterm1 = {
+      'rules' => [
+        {
+          'code' => '{ $$ = my_attrs($2,$3); } ',
+          'comment' => '',
+          'line' => ' MY myterm myattrlist { $$ = my_attrs($2,$3); } ',
+          'raw_rule' => ' MY myterm myattrlist ',
+          'rule' => '<MY> <myterm> <myattrlist>'
+        },
+        {
+          'code' => '{ $$ = localize($2,$1); } ',
+          'comment' => '',
+          'line' => ' MY myterm { $$ = localize($2,$1); } ',
+          'raw_rule' => ' MY myterm ',
+          'rule' => '<MY> <myterm>'
+        }
+      ],
+      'sym' => 'myattrterm',
+      'type' => 'nonterm'
+    };
+  */
+
+  "myattrterm"     : [
+		       "<MY> <myterm> <myattrlist>",
+		       "<MY> <myterm>",
+		     ],
+  /*
+    $myterm1 = {
+      'rules' => [
+        {
+          'code' => '{ $$ = sawparens($2); } ',
+          'comment' => '',
+          'line' => ' \'(\' expr \')\' { $$ = sawparens($2); } ',
+          'raw_rule' => ' ( expr ) ',
+          'rule' => '( <expr> )'
+        },
+        {
+          'code' => '{ $$ = sawparens(newNULLLIST()); } ',
+          'comment' => '',
+          'line' => ' \'(\' \')\' { $$ = sawparens(newNULLLIST()); } ',
+          'raw_rule' => ' ( ) ',
+          'rule' => '( )'
+        },
+        {
+          'code' => '{ $$ = $1; } ',
+          'comment' => '',
+          'line' => ' scalar %prec \'(\' { $$ = $1; } ',
+          'raw_rule' => ' scalar %prec ( ',
+          'rule' => '<scalar> {prec (}'
+        },
+        {
+          'code' => '{ $$ = $1; } ',
+          'comment' => '',
+          'line' => ' hsh %prec \'(\' { $$ = $1; } ',
+          'raw_rule' => ' hsh %prec ( ',
+          'rule' => '<hsh> {prec (}'
+        },
+        {
+          'code' => '{ $$ = $1; } ',
+          'comment' => '',
+          'line' => ' ary %prec \'(\' { $$ = $1; } ',
+          'raw_rule' => ' ary %prec ( ',
+          'rule' => '<ary> {prec (}'
+        }
+      ],
+      'sym' => 'myterm',
+      'type' => 'nonterm'
+    };
+  */
+
+  "myterm"         : [
+		       "( <expr> )",
+		       "( )",
+		       "<scalar> {prec (}",
+		       "<hsh> {prec (}",
+		       "<ary> {prec (}",
+		     ],
+  /*
     $subsignature1 = {
       'rules' => [
         {
-          'code' => '{ /* We shouldn\'t get here otherwise \*\/ assert(FEATURE_SIGNATURES_IS_ENABLED) Perl_ck_warner_d(aTHX_ packWARN(WARN_EXPERIMENTAL__SIGNATURES), "The signatures feature is experimental") $<opval>$ = parse_subsignature() } \')\' { $$ = op_append_list(OP_LINESEQ, $<opval>2, newSTATEOP(0, NULL, sawparens(newNULLLIST()))) parser->expect = XATTRBLOCK }',
-          'comment' => '',
+          'code' => '{ / assert(FEATURE_SIGNATURES_IS_ENABLED) Perl_ck_warner_d(aTHX_ packWARN(WARN_EXPERIMENTAL__SIGNATURES), "The signatures feature is experimental") $<opval>$ = parse_subsignature() } { $$ = op_append_list(OP_LINESEQ, $<opval>2, newSTATEOP(0, NULL, sawparens(newNULLLIST()))) parser->expect = XATTRBLOCK } ',
+          'comment' => '/* We shouldn\'t get here otherwise \*\/',
           'line' => ' \'(\' { /* We shouldn\'t get here otherwise \*\/ assert(FEATURE_SIGNATURES_IS_ENABLED) Perl_ck_warner_d(aTHX_ packWARN(WARN_EXPERIMENTAL__SIGNATURES), "The signatures feature is experimental") $<opval>$ = parse_subsignature() } \')\' { $$ = op_append_list(OP_LINESEQ, $<opval>2, newSTATEOP(0, NULL, sawparens(newNULLLIST()))) parser->expect = XATTRBLOCK } ',
-          'raw_rule' => ' \'(\' ',
-          'rule' => '('
+          'raw_rule' => ' (  ) ',
+          'rule' => '( )'
         }
       ],
       'sym' => 'subsignature',
@@ -1706,345 +2458,7 @@ grammar = {
   */
 
   "subsignature"   : [
-		       "(",
-		     ],
-  /*
-    $optsubbody1 = {
-      'rules' => [
-        {
-          'code' => '',
-          'comment' => '',
-          'line' => ' block ',
-          'raw_rule' => ' block',
-          'rule' => '<block>'
-        },
-        {
-          'code' => '{ $$ = (OP*)NULL; } ',
-          'comment' => '',
-          'line' => ' \';\' { $$ = (OP*)NULL; } ',
-          'raw_rule' => ' \';\' ',
-          'rule' => ';'
-        }
-      ],
-      'sym' => 'optsubbody',
-      'type' => 'nonterm'
-    };
-  */
-
-  "optsubbody"     : [
-		       "<block>",
-		       ";",
-		     ],
-  /*
-    $expr1 = {
-      'rules' => [
-        {
-          'code' => '{ $$ = newLOGOP(OP_AND, 0, $1, $3); } ',
-          'comment' => '',
-          'line' => ' expr ANDOP expr { $$ = newLOGOP(OP_AND, 0, $1, $3); } ',
-          'raw_rule' => ' expr ANDOP expr ',
-          'rule' => '<expr> <ANDOP> <expr>'
-        },
-        {
-          'code' => '{ $$ = newLOGOP($2, 0, $1, $3); } ',
-          'comment' => '',
-          'line' => ' expr OROP expr { $$ = newLOGOP($2, 0, $1, $3); } ',
-          'raw_rule' => ' expr OROP expr ',
-          'rule' => '<expr> <OROP> <expr>'
-        },
-        {
-          'code' => '{ $$ = newLOGOP(OP_DOR, 0, $1, $3); } ',
-          'comment' => '',
-          'line' => ' expr DOROP expr { $$ = newLOGOP(OP_DOR, 0, $1, $3); } ',
-          'raw_rule' => ' expr DOROP expr ',
-          'rule' => '<expr> <DOROP> <expr>'
-        },
-        {
-          'code' => '',
-          'comment' => '',
-          'line' => ' listexpr %prec PREC_LOW ',
-          'raw_rule' => ' listexpr %prec PREC_LOW',
-          'rule' => '<listexpr> {prec PREC_LOW}'
-        }
-      ],
-      'sym' => 'expr',
-      'type' => 'nonterm'
-    };
-  */
-
-  "expr"           : [
-		       "<expr> <ANDOP> <expr>",
-		       "<expr> <OROP> <expr>",
-		       "<expr> <DOROP> <expr>",
-		       "<listexpr> {prec PREC_LOW}",
-		     ],
-  /*
-    $listexpr1 = {
-      'rules' => [
-        {
-          'code' => '{ $$ = $1; } ',
-          'comment' => '',
-          'line' => ' listexpr \',\' { $$ = $1; } ',
-          'raw_rule' => ' listexpr \',\' ',
-          'rule' => '<listexpr> ,'
-        },
-        {
-          'code' => '{ OP* term = $3 $$ = op_append_elem(OP_LIST, $1, term) } ',
-          'comment' => '',
-          'line' => ' listexpr \',\' term { OP* term = $3 $$ = op_append_elem(OP_LIST, $1, term) } ',
-          'raw_rule' => ' listexpr \',\' term ',
-          'rule' => '<listexpr> , <term>'
-        },
-        {
-          'code' => '',
-          'comment' => '',
-          'line' => ' term %prec PREC_LOW ',
-          'raw_rule' => ' term %prec PREC_LOW',
-          'rule' => '<term> {prec PREC_LOW}'
-        }
-      ],
-      'sym' => 'listexpr',
-      'type' => 'nonterm'
-    };
-  */
-
-  "listexpr"       : [
-		       "<term> ,",
-		       "<term> , <listexpr>",
-		       //"<term> {prec PREC_LOW}",
-		     ],
-  /*
-    $listop1 = {
-      'rules' => [
-        {
-          'code' => '{ $$ = op_convert_list($1, OPf_STACKED, op_prepend_elem(OP_LIST, newGVREF($1,$2), $3) ) } ',
-          'comment' => '/* map {...} @args or print $fh @args \*\/',
-          'line' => ' LSTOP indirob listexpr /* map {...} @args or print $fh @args \*\/ { $$ = op_convert_list($1, OPf_STACKED, op_prepend_elem(OP_LIST, newGVREF($1,$2), $3) ) } ',
-          'raw_rule' => ' LSTOP indirob listexpr  ',
-          'rule' => '<LSTOP> <indirob> <listexpr>'
-        },
-        {
-          'code' => '{ $$ = op_convert_list($1, OPf_STACKED, op_prepend_elem(OP_LIST, newGVREF($1,$3), $4) ) } ',
-          'comment' => '/* print ($fh @args \*\/',
-          'line' => ' FUNC \'(\' indirob expr \')\' /* print ($fh @args \*\/ { $$ = op_convert_list($1, OPf_STACKED, op_prepend_elem(OP_LIST, newGVREF($1,$3), $4) ) } ',
-          'raw_rule' => ' FUNC \'(\' indirob expr \')\'  ',
-          'rule' => '<FUNC> ( <indirob> <expr> )'
-        },
-        {
-          'code' => '{ $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED, op_append_elem(OP_LIST, op_prepend_elem(OP_LIST, scalar($1), $5), newMETHOP(OP_METHOD, 0, $3))) } ',
-          'comment' => '/* $foo->bar(list) \*\/',
-          'line' => ' term ARROW method \'(\' optexpr \')\' /* $foo->bar(list) \*\/ { $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED, op_append_elem(OP_LIST, op_prepend_elem(OP_LIST, scalar($1), $5), newMETHOP(OP_METHOD, 0, $3))) } ',
-          'raw_rule' => ' term ARROW method \'(\' optexpr \')\'  ',
-          'rule' => '<term> <ARROW> <method> ( <optexpr> )'
-        },
-        {
-          'code' => '{ $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED, op_append_elem(OP_LIST, scalar($1), newMETHOP(OP_METHOD, 0, $3))) } ',
-          'comment' => '/* $foo->bar \*\/',
-          'line' => ' term ARROW method /* $foo->bar \*\/ { $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED, op_append_elem(OP_LIST, scalar($1), newMETHOP(OP_METHOD, 0, $3))) } ',
-          'raw_rule' => ' term ARROW method  ',
-          'rule' => '<term> <ARROW> <method>'
-        },
-        {
-          'code' => '{ $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED, op_append_elem(OP_LIST, op_prepend_elem(OP_LIST, $2, $3), newMETHOP(OP_METHOD, 0, $1))) } ',
-          'comment' => '/* new Class @args \*\/',
-          'line' => ' METHOD indirob optlistexpr /* new Class @args \*\/ { $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED, op_append_elem(OP_LIST, op_prepend_elem(OP_LIST, $2, $3), newMETHOP(OP_METHOD, 0, $1))) } ',
-          'raw_rule' => ' METHOD indirob optlistexpr  ',
-          'rule' => '<METHOD> <indirob> <optlistexpr>'
-        },
-        {
-          'code' => '{ $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED, op_append_elem(OP_LIST, op_prepend_elem(OP_LIST, $2, $4), newMETHOP(OP_METHOD, 0, $1))) } ',
-          'comment' => '/* method $object (@args) \*\/',
-          'line' => ' FUNCMETH indirob \'(\' optexpr \')\' /* method $object (@args) \*\/ { $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED, op_append_elem(OP_LIST, op_prepend_elem(OP_LIST, $2, $4), newMETHOP(OP_METHOD, 0, $1))) } ',
-          'raw_rule' => ' FUNCMETH indirob \'(\' optexpr \')\'  ',
-          'rule' => '<FUNCMETH> <indirob> ( <optexpr> )'
-        },
-        {
-          'code' => '{ $$ = op_convert_list($1, 0, $2); } ',
-          'comment' => '/* print @args \*\/',
-          'line' => ' LSTOP optlistexpr /* print @args \*\/ { $$ = op_convert_list($1, 0, $2); } ',
-          'raw_rule' => ' LSTOP optlistexpr  ',
-          'rule' => '<LSTOP> <optlistexpr>'
-        },
-        {
-          'code' => '{ $$ = op_convert_list($1, 0, $3); } ',
-          'comment' => '/* print (@args) \*\/',
-          'line' => ' FUNC \'(\' optexpr \')\' /* print (@args) \*\/ { $$ = op_convert_list($1, 0, $3); } ',
-          'raw_rule' => ' FUNC \'(\' optexpr \')\'  ',
-          'rule' => '<FUNC> ( <optexpr> )'
-        },
-        {
-          'code' => '{ SvREFCNT_inc_simple_void(PL_compcv) $<opval>$ = newANONATTRSUB($2, 0, (OP*)NULL, $3); } { $$ = newUNOP(OP_ENTERSUB, OPf_STACKED, op_append_elem(OP_LIST, op_prepend_elem(OP_LIST, $<opval>4, $5), $1)) } ',
-          'comment' => '/* sub f(&@); f { foo } ... \*\//* ... @bar \*\/',
-          'line' => ' LSTOPSUB startanonsub block /* sub f(&@); f { foo } ... \*\/ { SvREFCNT_inc_simple_void(PL_compcv) $<opval>$ = newANONATTRSUB($2, 0, (OP*)NULL, $3); } optlistexpr %prec LSTOP /* ... @bar \*\/ { $$ = newUNOP(OP_ENTERSUB, OPf_STACKED, op_append_elem(OP_LIST, op_prepend_elem(OP_LIST, $<opval>4, $5), $1)) } ',
-          'raw_rule' => ' LSTOPSUB startanonsub block   optlistexpr %prec LSTOP  ',
-          'rule' => '<LSTOPSUB> <startanonsub> <block> <optlistexpr> {prec LSTOP}'
-        }
-      ],
-      'sym' => 'listop',
-      'type' => 'nonterm'
-    };
-  */
-
-  "listop"         : [
-		       "<LSTOP> <indirob> <listexpr>",
-		       "<FUNC> ( <indirob> <expr> )",
-		       "<term> <ARROW> <method> ( <optexpr> )",
-		       "<term> <ARROW> <method>",
-		       "<METHOD> <indirob> <optlistexpr>",
-		       "<FUNCMETH> <indirob> ( <optexpr> )",
-		       "<LSTOP> <optlistexpr>",
-		       "<FUNC> ( <optexpr> )",
-		       "<LSTOPSUB> <startanonsub> <block> <optlistexpr> {prec LSTOP}",
-		     ],
-  /*
-    $method1 = {
-      'rules' => [
-        {
-          'code' => '',
-          'comment' => '',
-          'line' => ' METHOD ',
-          'raw_rule' => ' METHOD',
-          'rule' => '<METHOD>'
-        },
-        {
-          'code' => '',
-          'comment' => '',
-          'line' => ' scalar ',
-          'raw_rule' => ' scalar',
-          'rule' => '<scalar>'
-        }
-      ],
-      'sym' => 'method',
-      'type' => 'nonterm'
-    };
-  */
-
-  "method"         : [
-		       "<METHOD>",
-		       "<scalar>",
-		     ],
-  /*
-    $subscripted1 = {
-      'rules' => [
-        {
-          'code' => '{\' expr \';\' \'} { $$ = newBINOP(OP_GELEM, 0, $1, scalar($3)); } ',
-          'comment' => '/* *main::{something} \*\//* In this and all the hash accessors, \';\' is * provided by the tokeniser \*\/',
-          'line' => ' gelem \'{\' expr \';\' \'}\' /* *main::{something} \*\/ /* In this and all the hash accessors, \';\' is * provided by the tokeniser \*\/ { $$ = newBINOP(OP_GELEM, 0, $1, scalar($3)); } ',
-          'raw_rule' => ' gelem \'\'   ',
-          'rule' => '<gelem> '
-        },
-        {
-          'code' => '{ $$ = newBINOP(OP_AELEM, 0, oopsAV($1), scalar($3)) } ',
-          'comment' => '/* $array[$element] \*\/',
-          'line' => ' scalar \'[\' expr \']\' /* $array[$element] \*\/ { $$ = newBINOP(OP_AELEM, 0, oopsAV($1), scalar($3)) } ',
-          'raw_rule' => ' scalar \'[\' expr \']\'  ',
-          'rule' => '<scalar> [ <expr> ]'
-        },
-        {
-          'code' => '{ $$ = newBINOP(OP_AELEM, 0, ref(newAVREF($1),OP_RV2AV), scalar($4)) } ',
-          'comment' => '/* somearef->[$element] \*\/',
-          'line' => ' term ARROW \'[\' expr \']\' /* somearef->[$element] \*\/ { $$ = newBINOP(OP_AELEM, 0, ref(newAVREF($1),OP_RV2AV), scalar($4)) } ',
-          'raw_rule' => ' term ARROW \'[\' expr \']\'  ',
-          'rule' => '<term> <ARROW> [ <expr> ]'
-        },
-        {
-          'code' => '{ $$ = newBINOP(OP_AELEM, 0, ref(newAVREF($1),OP_RV2AV), scalar($3)) } ',
-          'comment' => '/* $foo->[$bar]->[$baz] \*\/',
-          'line' => ' subscripted \'[\' expr \']\' /* $foo->[$bar]->[$baz] \*\/ { $$ = newBINOP(OP_AELEM, 0, ref(newAVREF($1),OP_RV2AV), scalar($3)) } ',
-          'raw_rule' => ' subscripted \'[\' expr \']\'  ',
-          'rule' => '<subscripted> [ <expr> ]'
-        },
-        {
-          'code' => '{\' expr \';\' \'} { $$ = newBINOP(OP_HELEM, 0, oopsHV($1), jmaybe($3)) } ',
-          'comment' => '/* $foo{bar();} \*\/',
-          'line' => ' scalar \'{\' expr \';\' \'}\' /* $foo{bar();} \*\/ { $$ = newBINOP(OP_HELEM, 0, oopsHV($1), jmaybe($3)) } ',
-          'raw_rule' => ' scalar \'\'  ',
-          'rule' => '<scalar> '
-        },
-        {
-          'code' => '{\' expr \';\' \'} { $$ = newBINOP(OP_HELEM, 0, ref(newHVREF($1),OP_RV2HV), jmaybe($4)); } ',
-          'comment' => '/* somehref->{bar();} \*\/',
-          'line' => ' term ARROW \'{\' expr \';\' \'}\' /* somehref->{bar();} \*\/ { $$ = newBINOP(OP_HELEM, 0, ref(newHVREF($1),OP_RV2HV), jmaybe($4)); } ',
-          'raw_rule' => ' term ARROW \'\'  ',
-          'rule' => '<term> <ARROW> '
-        },
-        {
-          'code' => '{\' expr \';\' \'} { $$ = newBINOP(OP_HELEM, 0, ref(newHVREF($1),OP_RV2HV), jmaybe($3)); } ',
-          'comment' => '/* $foo->[bar]->{baz;} \*\/',
-          'line' => ' subscripted \'{\' expr \';\' \'}\' /* $foo->[bar]->{baz;} \*\/ { $$ = newBINOP(OP_HELEM, 0, ref(newHVREF($1),OP_RV2HV), jmaybe($3)); } ',
-          'raw_rule' => ' subscripted \'\'  ',
-          'rule' => '<subscripted> '
-        },
-        {
-          'code' => '{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED, newCVREF(0, scalar($1))); } ',
-          'comment' => '/* $subref->() \*\/',
-          'line' => ' term ARROW \'(\' \')\' /* $subref->() \*\/ { $$ = newUNOP(OP_ENTERSUB, OPf_STACKED, newCVREF(0, scalar($1))); } ',
-          'raw_rule' => ' term ARROW \'(\' \')\'  ',
-          'rule' => '<term> <ARROW> ( )'
-        },
-        {
-          'code' => '{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED, op_append_elem(OP_LIST, $4, newCVREF(0, scalar($1)))); } ',
-          'comment' => '/* $subref->(@args) \*\/',
-          'line' => ' term ARROW \'(\' expr \')\' /* $subref->(@args) \*\/ { $$ = newUNOP(OP_ENTERSUB, OPf_STACKED, op_append_elem(OP_LIST, $4, newCVREF(0, scalar($1)))); } ',
-          'raw_rule' => ' term ARROW \'(\' expr \')\'  ',
-          'rule' => '<term> <ARROW> ( <expr> )'
-        },
-        {
-          'code' => '{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED, op_append_elem(OP_LIST, $3, newCVREF(0, scalar($1)))); } ',
-          'comment' => '/* $foo->{bar}->(@args) \*\/',
-          'line' => ' subscripted \'(\' expr \')\' /* $foo->{bar}->(@args) \*\/ { $$ = newUNOP(OP_ENTERSUB, OPf_STACKED, op_append_elem(OP_LIST, $3, newCVREF(0, scalar($1)))); } ',
-          'raw_rule' => ' subscripted \'(\' expr \')\'  ',
-          'rule' => '<subscripted> ( <expr> )'
-        },
-        {
-          'code' => '{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED, newCVREF(0, scalar($1))); } ',
-          'comment' => '/* $foo->{bar}->() \*\/',
-          'line' => ' subscripted \'(\' \')\' /* $foo->{bar}->() \*\/ { $$ = newUNOP(OP_ENTERSUB, OPf_STACKED, newCVREF(0, scalar($1))); } ',
-          'raw_rule' => ' subscripted \'(\' \')\'  ',
-          'rule' => '<subscripted> ( )'
-        },
-        {
-          'code' => '{ $$ = newSLICEOP(0, $5, $2); } ',
-          'comment' => '/* list slice \*\/',
-          'line' => ' \'(\' expr \')\' \'[\' expr \']\' /* list slice \*\/ { $$ = newSLICEOP(0, $5, $2); } ',
-          'raw_rule' => ' \'(\' expr \')\' \'[\' expr \']\'  ',
-          'rule' => '( <expr> ) [ <expr> ]'
-        },
-        {
-          'code' => '{ $$ = newSLICEOP(0, $3, $1); } ',
-          'comment' => '/* list literal slice \*\/',
-          'line' => ' QWLIST \'[\' expr \']\' /* list literal slice \*\/ { $$ = newSLICEOP(0, $3, $1); } ',
-          'raw_rule' => ' QWLIST \'[\' expr \']\'  ',
-          'rule' => '<QWLIST> [ <expr> ]'
-        },
-        {
-          'code' => '{ $$ = newSLICEOP(0, $4, (OP*)NULL); } ',
-          'comment' => '/* empty list slice! \*\//* Binary operators between terms \*\/',
-          'line' => ' \'(\' \')\' \'[\' expr \']\' /* empty list slice! \*\/ { $$ = newSLICEOP(0, $4, (OP*)NULL); } /* Binary operators between terms \*\/ ',
-          'raw_rule' => ' \'(\' \')\' \'[\' expr \']\'   ',
-          'rule' => '( ) [ <expr> ]'
-        }
-      ],
-      'sym' => 'subscripted',
-      'type' => 'nonterm'
-    };
-  */
-
-  "subscripted"    : [
-		       "<gelem> ",
-		       "<scalar> [ <expr> ]",
-		       "<term> <ARROW> [ <expr> ]",
-		       "<subscripted> [ <expr> ]",
-		       "<scalar> ",
-		       "<term> <ARROW> ",
-		       "<subscripted> ",
-		       "<term> <ARROW> ( )",
-		       "<term> <ARROW> ( <expr> )",
-		       "<subscripted> ( <expr> )",
-		       "<subscripted> ( )",
-		       "( <expr> ) [ <expr> ]",
-		       "<QWLIST> [ <expr> ]",
-		       "( ) [ <expr> ]",
+		       "( )",
 		     ],
   /*
     $termbinop1 = {
@@ -2176,28 +2590,28 @@ grammar = {
           'code' => '{ $$ = newUNOP(OP_NEGATE, 0, scalar($2)); } ',
           'comment' => '/* -$x \*\/',
           'line' => ' \'-\' term %prec UMINUS /* -$x \*\/ { $$ = newUNOP(OP_NEGATE, 0, scalar($2)); } ',
-          'raw_rule' => ' \'-\' term %prec UMINUS  ',
+          'raw_rule' => ' - term %prec UMINUS  ',
           'rule' => '- <term> {prec UMINUS}'
         },
         {
           'code' => '{ $$ = $2; } ',
           'comment' => '/* +$x \*\/',
           'line' => ' \'+\' term %prec UMINUS /* +$x \*\/ { $$ = $2; } ',
-          'raw_rule' => ' \'+\' term %prec UMINUS  ',
+          'raw_rule' => ' + term %prec UMINUS  ',
           'rule' => '+ <term> {prec UMINUS}'
         },
         {
           'code' => '{ $$ = newUNOP(OP_NOT, 0, scalar($2)); } ',
           'comment' => '/* !$x \*\/',
           'line' => ' \'!\' term /* !$x \*\/ { $$ = newUNOP(OP_NOT, 0, scalar($2)); } ',
-          'raw_rule' => ' \'!\' term  ',
+          'raw_rule' => ' ! term  ',
           'rule' => '! <term>'
         },
         {
           'code' => '{ $$ = newUNOP($1, 0, scalar($2)); } ',
           'comment' => '/* ~$x \*\/',
           'line' => ' \'~\' term /* ~$x \*\/ { $$ = newUNOP($1, 0, scalar($2)); } ',
-          'raw_rule' => ' \'~\' term  ',
+          'raw_rule' => ' ~ term  ',
           'rule' => '~ <term>'
         },
         {
@@ -2246,11 +2660,11 @@ grammar = {
 		       "+ <term> {prec UMINUS}",
 		       "! <term>",
 		       "~ <term>",
-		       "<term> <INC>",
-		       "<term> <DEC>",
+		       "<term> <POSTINC>",
+		       "<term> <POSTDEC>",
 		       "<term> <POSTJOIN>",
-		       "<INC> <term>",
-		       "<DEC> <term>",
+		       "<PREINC> <term>",
+		       "<PREDEC> <term>",
 		     ],
   /*
     $anonymous1 = {
@@ -2259,43 +2673,43 @@ grammar = {
           'code' => '{ $$ = newANONLIST($2); } ',
           'comment' => '',
           'line' => ' \'[\' expr \']\' { $$ = newANONLIST($2); } ',
-          'raw_rule' => ' \'[\' expr \']\' ',
+          'raw_rule' => ' [ expr ] ',
           'rule' => '[ <expr> ]'
         },
         {
           'code' => '{ $$ = newANONLIST((OP*)NULL);} ',
           'comment' => '',
           'line' => ' \'[\' \']\' { $$ = newANONLIST((OP*)NULL);} ',
-          'raw_rule' => ' \'[\' \']\' ',
+          'raw_rule' => ' [ ] ',
           'rule' => '[ ]'
         },
         {
           'code' => '{ $$ = newANONHASH($2); } ',
           'comment' => '/* { foo => "Bar" } \*\/',
           'line' => ' HASHBRACK expr \';\' \'}\' %prec \'(\' /* { foo => "Bar" } \*\/ { $$ = newANONHASH($2); } ',
-          'raw_rule' => ' HASHBRACK expr \';\' \'}\' %prec \'(\'  ',
-          'rule' => '<HASHBRACK> <expr> ; } {prec \'(\'}'
+          'raw_rule' => ' HASHBRACK expr ; } %prec (  ',
+          'rule' => '<HASHBRACK> <expr> ; } {prec (}'
         },
         {
           'code' => '{ $$ = newANONHASH((OP*)NULL); } ',
           'comment' => '/* { } (\';\' by tokener) \*\/',
           'line' => ' HASHBRACK \';\' \'}\' %prec \'(\' /* { } (\';\' by tokener) \*\/ { $$ = newANONHASH((OP*)NULL); } ',
-          'raw_rule' => ' HASHBRACK \';\' \'}\' %prec \'(\'  ',
-          'rule' => '<HASHBRACK> ; } {prec \'(\'}'
+          'raw_rule' => ' HASHBRACK ; } %prec (  ',
+          'rule' => '<HASHBRACK> ; } {prec (}'
         },
         {
           'code' => '{ SvREFCNT_inc_simple_void(PL_compcv) $$ = newANONATTRSUB($2, $3, $4, $5); } ',
           'comment' => '',
           'line' => ' ANONSUB startanonsub proto subattrlist block %prec \'(\' { SvREFCNT_inc_simple_void(PL_compcv) $$ = newANONATTRSUB($2, $3, $4, $5); } ',
-          'raw_rule' => ' ANONSUB startanonsub proto subattrlist block %prec \'(\' ',
-          'rule' => '<ANONSUB> <startanonsub> <proto> <subattrlist> <block> {prec \'(\'}'
+          'raw_rule' => ' ANONSUB startanonsub proto subattrlist block %prec ( ',
+          'rule' => '<ANONSUB> <startanonsub> <proto> <subattrlist> <block> {prec (}'
         },
         {
-          'code' => '{\' stmtseq \'} { OP *body if (parser->copline > (line_t)$6) parser->copline = (line_t)$6 body = block_end($3, op_append_list(OP_LINESEQ, $4, $7)) SvREFCNT_inc_simple_void(PL_compcv) $$ = newANONATTRSUB($2, NULL, $5, body) } ',
+          'code' => '{ OP *body if (parser->copline > (line_t)$6) parser->copline = (line_t)$6 body = block_end($3, op_append_list(OP_LINESEQ, $4, $7)) SvREFCNT_inc_simple_void(PL_compcv) $$ = newANONATTRSUB($2, NULL, $5, body) } ',
           'comment' => '/* Things called with "do" \*\/',
           'line' => ' ANONSUB startanonsub remember subsignature subattrlist \'{\' stmtseq \'}\' %prec \'(\' { OP *body if (parser->copline > (line_t)$6) parser->copline = (line_t)$6 body = block_end($3, op_append_list(OP_LINESEQ, $4, $7)) SvREFCNT_inc_simple_void(PL_compcv) $$ = newANONATTRSUB($2, NULL, $5, body) } /* Things called with "do" \*\/ ',
-          'raw_rule' => ' ANONSUB startanonsub remember subsignature subattrlist \'\' %prec \'(\'  ',
-          'rule' => '<ANONSUB> <startanonsub> <remember> <subsignature> <subattrlist>  {prec \'(\'}'
+          'raw_rule' => ' ANONSUB startanonsub remember subsignature subattrlist { stmtseq } %prec (  ',
+          'rule' => '<ANONSUB> <startanonsub> <remember> <subsignature> <subattrlist> { <stmtseq> } {prec (}'
         }
       ],
       'sym' => 'anonymous',
@@ -2306,10 +2720,10 @@ grammar = {
   "anonymous"      : [
 		       "[ <expr> ]",
 		       "[ ]",
-		       "<HASHBRACK> <expr> ; } {prec '('}",
-		       "<HASHBRACK> ; } {prec '('}",
-		       "<ANONSUB> <startanonsub> <proto> <subattrlist> <block> {prec '('}",
-		       "<ANONSUB> <startanonsub> <remember> <subsignature> <subattrlist>  {prec '('}",
+		       "<HASHBRACK> <expr> ; } {prec (}",
+		       "<HASHBRACK> ; } {prec (}",
+		       "<ANONSUB> <startanonsub> <proto> <subattrlist> <block> {prec (}",
+		       "<ANONSUB> <startanonsub> <remember> <subsignature> <subattrlist> { <stmtseq> } {prec (}",
 		     ],
   /*
     $termdo1 = {
@@ -2325,8 +2739,8 @@ grammar = {
           'code' => '{ $$ = newUNOP(OP_NULL, OPf_SPECIAL, op_scope($2));} ',
           'comment' => '/* do { code \*\/',
           'line' => ' DO block %prec \'(\' /* do { code \*\/ { $$ = newUNOP(OP_NULL, OPf_SPECIAL, op_scope($2));} term : termbinop ',
-          'raw_rule' => ' DO block %prec \'(\'   term : termbinop',
-          'rule' => '<DO> <block> {prec \'(\'} <term> : <termbinop>'
+          'raw_rule' => ' DO block %prec (   term : termbinop',
+          'rule' => '<DO> <block> {prec (} <term> : <termbinop>'
         },
         {
           'code' => '',
@@ -2353,7 +2767,7 @@ grammar = {
           'code' => '{ $$ = newCONDOP(0, $1, $3, $5); } ',
           'comment' => '',
           'line' => ' term \'?\' term \':\' term { $$ = newCONDOP(0, $1, $3, $5); } ',
-          'raw_rule' => ' term \'?\' term \':\' term ',
+          'raw_rule' => ' term ? term : term ',
           'rule' => '<term> ? <term> : <term>'
         },
         {
@@ -2381,7 +2795,7 @@ grammar = {
           'code' => '{ $$ = sawparens($2); } ',
           'comment' => '',
           'line' => ' \'(\' expr \')\' { $$ = sawparens($2); } ',
-          'raw_rule' => ' \'(\' expr \')\' ',
+          'raw_rule' => ' ( expr ) ',
           'rule' => '( <expr> )'
         },
         {
@@ -2395,43 +2809,43 @@ grammar = {
           'code' => '{ $$ = sawparens(newNULLLIST()); } ',
           'comment' => '',
           'line' => ' \'(\' \')\' { $$ = sawparens(newNULLLIST()); } ',
-          'raw_rule' => ' \'(\' \')\' ',
+          'raw_rule' => ' ( ) ',
           'rule' => '( )'
         },
         {
           'code' => '{ $$ = $1; } ',
           'comment' => '',
           'line' => ' scalar %prec \'(\' { $$ = $1; } ',
-          'raw_rule' => ' scalar %prec \'(\' ',
-          'rule' => '<scalar> {prec \'(\'}'
+          'raw_rule' => ' scalar %prec ( ',
+          'rule' => '<scalar> {prec (}'
         },
         {
           'code' => '{ $$ = $1; } ',
           'comment' => '',
           'line' => ' star %prec \'(\' { $$ = $1; } ',
-          'raw_rule' => ' star %prec \'(\' ',
-          'rule' => '<star> {prec \'(\'}'
+          'raw_rule' => ' star %prec ( ',
+          'rule' => '<star> {prec (}'
         },
         {
           'code' => '{ $$ = $1; } ',
           'comment' => '',
           'line' => ' hsh %prec \'(\' { $$ = $1; } ',
-          'raw_rule' => ' hsh %prec \'(\' ',
-          'rule' => '<hsh> {prec \'(\'}'
+          'raw_rule' => ' hsh %prec ( ',
+          'rule' => '<hsh> {prec (}'
         },
         {
           'code' => '{ $$ = $1; } ',
           'comment' => '',
           'line' => ' ary %prec \'(\' { $$ = $1; } ',
-          'raw_rule' => ' ary %prec \'(\' ',
-          'rule' => '<ary> {prec \'(\'}'
+          'raw_rule' => ' ary %prec ( ',
+          'rule' => '<ary> {prec (}'
         },
         {
           'code' => '{ $$ = newUNOP(OP_AV2ARYLEN, 0, ref($1, OP_AV2ARYLEN));} ',
           'comment' => '/* $#x, $#{ something } \*\/',
           'line' => ' arylen %prec \'(\' /* $#x, $#{ something } \*\/ { $$ = newUNOP(OP_AV2ARYLEN, 0, ref($1, OP_AV2ARYLEN));} ',
-          'raw_rule' => ' arylen %prec \'(\'  ',
-          'rule' => '<arylen> {prec \'(\'}'
+          'raw_rule' => ' arylen %prec (  ',
+          'rule' => '<arylen> {prec (}'
         },
         {
           'code' => '{ $$ = $1; } ',
@@ -2444,36 +2858,36 @@ grammar = {
           'code' => '{ $$ = op_prepend_elem(OP_ASLICE, newOP(OP_PUSHMARK, 0), newLISTOP(OP_ASLICE, 0, list($3), ref($1, OP_ASLICE))) if ($$ && $1) $$->op_private |= $1->op_private & OPpSLICEWARNING } ',
           'comment' => '/* array slice \*\/',
           'line' => ' sliceme \'[\' expr \']\' /* array slice \*\/ { $$ = op_prepend_elem(OP_ASLICE, newOP(OP_PUSHMARK, 0), newLISTOP(OP_ASLICE, 0, list($3), ref($1, OP_ASLICE))) if ($$ && $1) $$->op_private |= $1->op_private & OPpSLICEWARNING } ',
-          'raw_rule' => ' sliceme \'[\' expr \']\'  ',
+          'raw_rule' => ' sliceme [ expr ]  ',
           'rule' => '<sliceme> [ <expr> ]'
         },
         {
           'code' => '{ $$ = op_prepend_elem(OP_KVASLICE, newOP(OP_PUSHMARK, 0), newLISTOP(OP_KVASLICE, 0, list($3), ref(oopsAV($1), OP_KVASLICE))) if ($$ && $1) $$->op_private |= $1->op_private & OPpSLICEWARNING } ',
           'comment' => '/* array key/value slice \*\/',
           'line' => ' kvslice \'[\' expr \']\' /* array key/value slice \*\/ { $$ = op_prepend_elem(OP_KVASLICE, newOP(OP_PUSHMARK, 0), newLISTOP(OP_KVASLICE, 0, list($3), ref(oopsAV($1), OP_KVASLICE))) if ($$ && $1) $$->op_private |= $1->op_private & OPpSLICEWARNING } ',
-          'raw_rule' => ' kvslice \'[\' expr \']\'  ',
+          'raw_rule' => ' kvslice [ expr ]  ',
           'rule' => '<kvslice> [ <expr> ]'
         },
         {
-          'code' => '{\' expr \';\' \'} { $$ = op_prepend_elem(OP_HSLICE, newOP(OP_PUSHMARK, 0), newLISTOP(OP_HSLICE, 0, list($3), ref(oopsHV($1), OP_HSLICE))) if ($$ && $1) $$->op_private |= $1->op_private & OPpSLICEWARNING } ',
+          'code' => '{ $$ = op_prepend_elem(OP_HSLICE, newOP(OP_PUSHMARK, 0), newLISTOP(OP_HSLICE, 0, list($3), ref(oopsHV($1), OP_HSLICE))) if ($$ && $1) $$->op_private |= $1->op_private & OPpSLICEWARNING } ',
           'comment' => '/* @hash{@keys} \*\/',
           'line' => ' sliceme \'{\' expr \';\' \'}\' /* @hash{@keys} \*\/ { $$ = op_prepend_elem(OP_HSLICE, newOP(OP_PUSHMARK, 0), newLISTOP(OP_HSLICE, 0, list($3), ref(oopsHV($1), OP_HSLICE))) if ($$ && $1) $$->op_private |= $1->op_private & OPpSLICEWARNING } ',
-          'raw_rule' => ' sliceme \'\'  ',
-          'rule' => '<sliceme> '
+          'raw_rule' => ' sliceme { expr ; }  ',
+          'rule' => '<sliceme> { <expr> ; }'
         },
         {
-          'code' => '{\' expr \';\' \'} { $$ = op_prepend_elem(OP_KVHSLICE, newOP(OP_PUSHMARK, 0), newLISTOP(OP_KVHSLICE, 0, list($3), ref($1, OP_KVHSLICE))) if ($$ && $1) $$->op_private |= $1->op_private & OPpSLICEWARNING } ',
+          'code' => '{ $$ = op_prepend_elem(OP_KVHSLICE, newOP(OP_PUSHMARK, 0), newLISTOP(OP_KVHSLICE, 0, list($3), ref($1, OP_KVHSLICE))) if ($$ && $1) $$->op_private |= $1->op_private & OPpSLICEWARNING } ',
           'comment' => '/* %hash{@keys} \*\/',
           'line' => ' kvslice \'{\' expr \';\' \'}\' /* %hash{@keys} \*\/ { $$ = op_prepend_elem(OP_KVHSLICE, newOP(OP_PUSHMARK, 0), newLISTOP(OP_KVHSLICE, 0, list($3), ref($1, OP_KVHSLICE))) if ($$ && $1) $$->op_private |= $1->op_private & OPpSLICEWARNING } ',
-          'raw_rule' => ' kvslice \'\'  ',
-          'rule' => '<kvslice> '
+          'raw_rule' => ' kvslice { expr ; }  ',
+          'rule' => '<kvslice> { <expr> ; }'
         },
         {
           'code' => '{ $$ = $1; } ',
           'comment' => '',
           'line' => ' THING %prec \'(\' { $$ = $1; } ',
-          'raw_rule' => ' THING %prec \'(\' ',
-          'rule' => '<THING> {prec \'(\'}'
+          'raw_rule' => ' THING %prec ( ',
+          'rule' => '<THING> {prec (}'
         },
         {
           'code' => '{ $$ = newUNOP(OP_ENTERSUB, 0, scalar($1)); } ',
@@ -2486,14 +2900,14 @@ grammar = {
           'code' => '{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED, scalar($1)) } ',
           'comment' => '/* &foo() or foo() \*\/',
           'line' => ' amper \'(\' \')\' /* &foo() or foo() \*\/ { $$ = newUNOP(OP_ENTERSUB, OPf_STACKED, scalar($1)) } ',
-          'raw_rule' => ' amper \'(\' \')\'  ',
+          'raw_rule' => ' amper ( )  ',
           'rule' => '<amper> ( )'
         },
         {
           'code' => '{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED, op_append_elem(OP_LIST, $3, scalar($1))) } ',
           'comment' => '/* &foo(@args) or foo(@args) \*\/',
           'line' => ' amper \'(\' expr \')\' /* &foo(@args) or foo(@args) \*\/ { $$ = newUNOP(OP_ENTERSUB, OPf_STACKED, op_append_elem(OP_LIST, $3, scalar($1))) } ',
-          'raw_rule' => ' amper \'(\' expr \')\'  ',
+          'raw_rule' => ' amper ( expr )  ',
           'rule' => '<amper> ( <expr> )'
         },
         {
@@ -2507,36 +2921,36 @@ grammar = {
           'code' => '{ $$ = newSVREF($1); } ',
           'comment' => '',
           'line' => ' term ARROW \'$\' \'*\' { $$ = newSVREF($1); } ',
-          'raw_rule' => ' term ARROW \'$\' \'*\' ',
+          'raw_rule' => ' term ARROW $ * ',
           'rule' => '<term> <ARROW> $ *'
         },
         {
           'code' => '{ $$ = newAVREF($1); } ',
           'comment' => '',
           'line' => ' term ARROW \'@\' \'*\' { $$ = newAVREF($1); } ',
-          'raw_rule' => ' term ARROW \'@\' \'*\' ',
+          'raw_rule' => ' term ARROW @ * ',
           'rule' => '<term> <ARROW> @ *'
         },
         {
           'code' => '{ $$ = newHVREF($1); } ',
           'comment' => '',
           'line' => ' term ARROW \'%\' \'*\' { $$ = newHVREF($1); } ',
-          'raw_rule' => ' term ARROW \'%\' \'*\' ',
-          'rule' => '<term> <ARROW> % *'
+          'raw_rule' => ' term ARROW % * ',
+          'rule' => '<term> <ARROW> { *}'
         },
         {
           'code' => '{ $$ = newUNOP(OP_ENTERSUB, 0, scalar(newCVREF($3,$1))); } ',
           'comment' => '',
           'line' => ' term ARROW \'&\' \'*\' { $$ = newUNOP(OP_ENTERSUB, 0, scalar(newCVREF($3,$1))); } ',
-          'raw_rule' => ' term ARROW \'&\' \'*\' ',
+          'raw_rule' => ' term ARROW & * ',
           'rule' => '<term> <ARROW> & *'
         },
         {
           'code' => '{ $$ = newGVREF(0,$1); } ',
           'comment' => '',
           'line' => ' term ARROW \'*\' \'*\' %prec \'(\' { $$ = newGVREF(0,$1); } ',
-          'raw_rule' => ' term ARROW \'*\' \'*\' %prec \'(\' ',
-          'rule' => '<term> <ARROW> * * {prec \'(\'}'
+          'raw_rule' => ' term ARROW * * %prec ( ',
+          'rule' => '<term> <ARROW> * * {prec (}'
         },
         {
           'code' => '{ $$ = newOP($1, OPf_SPECIAL) PL_hints |= HINT_BLOCK_SCOPE; } ',
@@ -2619,7 +3033,7 @@ grammar = {
           'code' => '{ $$ = newOP($1, 0);} ',
           'comment' => '',
           'line' => ' FUNC0 \'(\' \')\' { $$ = newOP($1, 0);} ',
-          'raw_rule' => ' FUNC0 \'(\' \')\' ',
+          'raw_rule' => ' FUNC0 ( ) ',
           'rule' => '<FUNC0> ( )'
         },
         {
@@ -2633,7 +3047,7 @@ grammar = {
           'code' => '{ $$ = $1; } ',
           'comment' => '',
           'line' => ' FUNC0OP \'(\' \')\' { $$ = $1; } ',
-          'raw_rule' => ' FUNC0OP \'(\' \')\' ',
+          'raw_rule' => ' FUNC0OP ( ) ',
           'rule' => '<FUNC0OP> ( )'
         },
         {
@@ -2647,21 +3061,21 @@ grammar = {
           'code' => '{ $$ = ($1 == OP_NOT) ? newUNOP($1, 0, newSVOP(OP_CONST, 0, newSViv(0))) : newOP($1, OPf_SPECIAL); } ',
           'comment' => '/* not () \*\/',
           'line' => ' FUNC1 \'(\' \')\' /* not () \*\/ { $$ = ($1 == OP_NOT) ? newUNOP($1, 0, newSVOP(OP_CONST, 0, newSViv(0))) : newOP($1, OPf_SPECIAL); } ',
-          'raw_rule' => ' FUNC1 \'(\' \')\'  ',
+          'raw_rule' => ' FUNC1 ( )  ',
           'rule' => '<FUNC1> ( )'
         },
         {
           'code' => '{ $$ = newUNOP($1, 0, $3); } ',
           'comment' => '/* not($foo) \*\/',
           'line' => ' FUNC1 \'(\' expr \')\' /* not($foo) \*\/ { $$ = newUNOP($1, 0, $3); } ',
-          'raw_rule' => ' FUNC1 \'(\' expr \')\'  ',
+          'raw_rule' => ' FUNC1 ( expr )  ',
           'rule' => '<FUNC1> ( <expr> )'
         },
         {
           'code' => '{ if ( $1->op_type != OP_TRANS && $1->op_type != OP_TRANSR && (((PMOP*)$1)->op_pmflags & PMf_HAS_CV)) { $<ival>$ = start_subparse(FALSE, CVf_ANON) SAVEFREESV(PL_compcv) } else $<ival>$ = 0 } { $$ = pmruntime($1, $4, $5, 1, $<ival>2); } ',
           'comment' => '/* m//, s///, qr//, tr/// \*\/',
           'line' => ' PMFUNC /* m//, s///, qr//, tr/// \*\/ { if ( $1->op_type != OP_TRANS && $1->op_type != OP_TRANSR && (((PMOP*)$1)->op_pmflags & PMf_HAS_CV)) { $<ival>$ = start_subparse(FALSE, CVf_ANON) SAVEFREESV(PL_compcv) } else $<ival>$ = 0 } \'(\' listexpr optrepl \')\' { $$ = pmruntime($1, $4, $5, 1, $<ival>2); } ',
-          'raw_rule' => ' PMFUNC   \'(\' listexpr optrepl \')\' ',
+          'raw_rule' => ' PMFUNC   ( listexpr optrepl ) ',
           'rule' => '<PMFUNC> ( <listexpr> <optrepl> )'
         },
         {
@@ -2700,8 +3114,8 @@ grammar = {
 
   "termdo"         : [
 		       "<DO> <term> {prec UNIOP}",
-		       "<DO> <block> {prec '('} <term> : <termbinop>",
-                     ],
+		       "<DO> <block> {prec (} <term> : <termbinop>",
+		     ],
 
   "term"           : [
 		       "<termunop>",
@@ -2714,26 +3128,26 @@ grammar = {
 		       "( <expr> )",
 		       "<QWLIST>",
 		       "( )",
-		       "<scalar> {prec '('}",
-		       "<star> {prec '('}",
-		       "<hsh> {prec '('}",
-		       "<ary> {prec '('}",
-		       "<arylen> {prec '('}",
+		       "<scalar> {prec (}",
+		       "<star> {prec (}",
+		       "<hsh> {prec (}",
+		       "<ary> {prec (}",
+		       "<arylen> {prec (}",
 		       "<subscripted>",
 		       "<sliceme> [ <expr> ]",
 		       "<kvslice> [ <expr> ]",
-		       "<sliceme> ",
-		       "<kvslice> ",
-		       "<THING> {prec '('}",
+		       "<sliceme> { <expr> ; }",
+		       "<kvslice> { <expr> ; }",
+		       "<THING> {prec (}",
 		       "<amper>",
 		       "<amper> ( )",
 		       "<amper> ( <expr> )",
 		       "<NOAMP> <subname> <optlistexpr>",
 		       "<term> <ARROW> $ *",
 		       "<term> <ARROW> @ *",
-		       "<term> <ARROW> % *",
+		       "<term> <ARROW> { *}",
 		       "<term> <ARROW> & *",
-		       "<term> <ARROW> * * {prec '('}",
+		       "<term> <ARROW> * * {prec (}",
 		       "<LOOPEX>",
 		       "<LOOPEX> <term>",
 		       "<NOTOP> <listexpr>",
@@ -2758,112 +3172,7 @@ grammar = {
 		       "<PLUGEXPR>",
 		     ],
   /*
-    $myattrterm1 = {
-      'rules' => [
-        {
-          'code' => '{ $$ = my_attrs($2,$3); } ',
-          'comment' => '',
-          'line' => ' MY myterm myattrlist { $$ = my_attrs($2,$3); } ',
-          'raw_rule' => ' MY myterm myattrlist ',
-          'rule' => '<MY> <myterm> <myattrlist>'
-        },
-        {
-          'code' => '{ $$ = localize($2,$1); } ',
-          'comment' => '',
-          'line' => ' MY myterm { $$ = localize($2,$1); } ',
-          'raw_rule' => ' MY myterm ',
-          'rule' => '<MY> <myterm>'
-        }
-      ],
-      'sym' => 'myattrterm',
-      'type' => 'nonterm'
-    };
-  */
-
-  "myattrterm"     : [
-		       "<MY> <myterm> <myattrlist>",
-		       "<MY> <myterm>",
-		     ],
-  /*
-    $myterm1 = {
-      'rules' => [
-        {
-          'code' => '{ $$ = sawparens($2); } ',
-          'comment' => '',
-          'line' => ' \'(\' expr \')\' { $$ = sawparens($2); } ',
-          'raw_rule' => ' \'(\' expr \')\' ',
-          'rule' => '( <expr> )'
-        },
-        {
-          'code' => '{ $$ = sawparens(newNULLLIST()); } ',
-          'comment' => '',
-          'line' => ' \'(\' \')\' { $$ = sawparens(newNULLLIST()); } ',
-          'raw_rule' => ' \'(\' \')\' ',
-          'rule' => '( )'
-        },
-        {
-          'code' => '{ $$ = $1; } ',
-          'comment' => '',
-          'line' => ' scalar %prec \'(\' { $$ = $1; } ',
-          'raw_rule' => ' scalar %prec \'(\' ',
-          'rule' => '<scalar> {prec \'(\'}'
-        },
-        {
-          'code' => '{ $$ = $1; } ',
-          'comment' => '',
-          'line' => ' hsh %prec \'(\' { $$ = $1; } ',
-          'raw_rule' => ' hsh %prec \'(\' ',
-          'rule' => '<hsh> {prec \'(\'}'
-        },
-        {
-          'code' => '{ $$ = $1; } ',
-          'comment' => '',
-          'line' => ' ary %prec \'(\' { $$ = $1; } ',
-          'raw_rule' => ' ary %prec \'(\' ',
-          'rule' => '<ary> {prec \'(\'}'
-        }
-      ],
-      'sym' => 'myterm',
-      'type' => 'nonterm'
-    };
-  */
-
-  "myterm"         : [
-		       "( <expr> )",
-		       "( )",
-		       "<scalar> {prec '('}",
-		       "<hsh> {prec '('}",
-		       "<ary> {prec '('}",
-		     ],
-  /*
-    $optlistexpr1 = {
-      'rules' => [
-        {
-          'code' => '{ $$ = (OP*)NULL; } ',
-          'comment' => '/* NULL \*\/',
-          'line' => ' /* NULL \*\/ %prec PREC_LOW { $$ = (OP*)NULL; } ',
-          'raw_rule' => '  %prec PREC_LOW ',
-          'rule' => '{prec PREC_LOW}'
-        },
-        {
-          'code' => '{ $$ = $1; } ',
-          'comment' => '',
-          'line' => ' listexpr %prec PREC_LOW { $$ = $1; } ',
-          'raw_rule' => ' listexpr %prec PREC_LOW ',
-          'rule' => '<listexpr> {prec PREC_LOW}'
-        }
-      ],
-      'sym' => 'optlistexpr',
-      'type' => 'nonterm'
-    };
-  */
-
-  "optlistexpr"    : [
-		       "{prec PREC_LOW}",
-		       "<listexpr> {prec PREC_LOW}",
-		     ],
-  /*
-    $optexpr1 = {
+    $formstmtseq1 = {
       'rules' => [
         {
           'code' => '{ $$ = (OP*)NULL; } ',
@@ -2873,375 +3182,357 @@ grammar = {
           'rule' => ''
         },
         {
-          'code' => '{ $$ = $1; } ',
+          'code' => '{ $$ = op_append_list(OP_LINESEQ, $1, $2) PL_pad_reset_pending = TRUE if ($1 && $2) PL_hints |= HINT_BLOCK_SCOPE } ',
           'comment' => '',
-          'line' => ' expr { $$ = $1; } ',
-          'raw_rule' => ' expr ',
-          'rule' => '<expr>'
+          'line' => ' formstmtseq formline { $$ = op_append_list(OP_LINESEQ, $1, $2) PL_pad_reset_pending = TRUE if ($1 && $2) PL_hints |= HINT_BLOCK_SCOPE } ',
+          'raw_rule' => ' formstmtseq formline ',
+          'rule' => '<formstmtseq> <formline>'
         }
       ],
-      'sym' => 'optexpr',
+      'sym' => 'formstmtseq',
       'type' => 'nonterm'
     };
   */
 
-  "optexpr"        : [
+  "formstmtseq"    : [
 		       "",
-		       "<expr>",
+		       "<formstmtseq> <formline>",
 		     ],
   /*
-    $optrepl1 = {
+    $formline1 = {
       'rules' => [
         {
-          'code' => '{ $$ = (OP*)NULL; } ',
+          'code' => '{ OP *list if ($2) { OP *term = $2 list = op_append_elem(OP_LIST, $1, term) } else { list = $1 } if (parser->copline == NOLINE) parser->copline = CopLINE(PL_curcop)-1 else parser->copline-- $$ = newSTATEOP(0, NULL, op_convert_list(OP_FORMLINE, 0, list)) } ',
+          'comment' => '',
+          'line' => ' THING formarg { OP *list if ($2) { OP *term = $2 list = op_append_elem(OP_LIST, $1, term) } else { list = $1 } if (parser->copline == NOLINE) parser->copline = CopLINE(PL_curcop)-1 else parser->copline-- $$ = newSTATEOP(0, NULL, op_convert_list(OP_FORMLINE, 0, list)) } ',
+          'raw_rule' => ' THING formarg ',
+          'rule' => '<THING> <formarg>'
+        }
+      ],
+      'sym' => 'formline',
+      'type' => 'nonterm'
+    };
+  */
+
+  "formline"       : [
+		       "<THING> <formarg>",
+		     ],
+  /*
+    $formarg1 = {
+      'rules' => [
+        {
+          'code' => '{ $$ = NULL; } ',
           'comment' => '/* NULL \*\/',
-          'line' => ' /* NULL \*\/ { $$ = (OP*)NULL; } ',
+          'line' => ' /* NULL \*\/ { $$ = NULL; } ',
           'raw_rule' => '  ',
           'rule' => ''
         },
         {
-          'code' => '{ $$ = $2; } ',
+          'code' => '{ $$ = op_unscope($2); } ',
           'comment' => '',
-          'line' => ' \'/\' expr { $$ = $2; } ',
-          'raw_rule' => ' \'/\' expr ',
-          'rule' => '/ <expr>'
+          'line' => ' FORMLBRACK stmtseq FORMRBRACK { $$ = op_unscope($2); } ',
+          'raw_rule' => ' FORMLBRACK stmtseq FORMRBRACK ',
+          'rule' => '<FORMLBRACK> <stmtseq> <FORMRBRACK>'
         }
       ],
-      'sym' => 'optrepl',
+      'sym' => 'formarg',
       'type' => 'nonterm'
     };
   */
 
-  "optrepl"        : [
+  "formarg"        : [
 		       "",
-		       "/ <expr>",
+		       "<FORMLBRACK> <stmtseq> <FORMRBRACK>",
 		     ],
   /*
-    $my_scalar1 = {
-      'rules' => [
-        {
-          'code' => '{ parser->in_my = 0; $$ = my($1); } ',
-          'comment' => '',
-          'line' => ' scalar { parser->in_my = 0; $$ = my($1); } ',
-          'raw_rule' => ' scalar ',
-          'rule' => '<scalar>'
-        }
-      ],
-      'sym' => 'my_scalar',
-      'type' => 'nonterm'
+    $PREC_LOW1 = {
+      'sym' => 'PREC_LOW',
+      'type' => 'nonassoc'
     };
   */
 
-  "my_scalar"      : [
-		       "<scalar>",
+  "PREC_LOW"       : [
+		       /PREC_LOW/i,
 		     ],
   /*
-    $my_var1 = {
-      'rules' => [
-        {
-          'code' => '',
-          'comment' => '',
-          'line' => ' scalar ',
-          'raw_rule' => ' scalar',
-          'rule' => '<scalar>'
-        },
-        {
-          'code' => '',
-          'comment' => '',
-          'line' => ' ary ',
-          'raw_rule' => ' ary',
-          'rule' => '<ary>'
-        },
-        {
-          'code' => '',
-          'comment' => '',
-          'line' => ' hsh ',
-          'raw_rule' => ' hsh',
-          'rule' => '<hsh>'
-        }
-      ],
-      'sym' => 'my_var',
-      'type' => 'nonterm'
+    $OROP1 = {
+      'sym' => 'OROP',
+      'type' => 'left'
     };
   */
 
-  "my_var"         : [
-		       "<scalar>",
-		       "<ary>",
-		       "<hsh>",
+  "OROP"           : [
+		       /OROP/i,
 		     ],
   /*
-    $refgen_topic1 = {
-      'rules' => [
-        {
-          'code' => '',
-          'comment' => '',
-          'line' => ' my_var ',
-          'raw_rule' => ' my_var',
-          'rule' => '<my_var>'
-        },
-        {
-          'code' => '',
-          'comment' => '',
-          'line' => ' amper ',
-          'raw_rule' => ' amper',
-          'rule' => '<amper>'
-        }
-      ],
-      'sym' => 'refgen_topic',
-      'type' => 'nonterm'
+    $DOROP1 = {
+      'sym' => 'DOROP',
+      'type' => 'left'
     };
   */
 
-  "refgen_topic"   : [
-		       "<my_var>",
-		       "<amper>",
+  "DOROP"          : [
+		       /DOROP/i,
 		     ],
   /*
-    $amper1 = {
-      'rules' => [
-        {
-          'code' => '{ $$ = newCVREF($1,$2); } ',
-          'comment' => '',
-          'line' => ' \'&\' indirob { $$ = newCVREF($1,$2); } ',
-          'raw_rule' => ' \'&\' indirob ',
-          'rule' => '& <indirob>'
-        }
-      ],
-      'sym' => 'amper',
-      'type' => 'nonterm'
+    $ANDOP1 = {
+      'sym' => 'ANDOP',
+      'type' => 'left'
     };
   */
 
-  "amper"          : [
-		       "& <indirob>",
+  "ANDOP"          : [
+		       /ANDOP/i,
 		     ],
   /*
-    $scalar1 = {
-      'rules' => [
-        {
-          'code' => '{ $$ = newSVREF($2); } ',
-          'comment' => '',
-          'line' => ' \'$\' indirob { $$ = newSVREF($2); } ',
-          'raw_rule' => ' \'$\' indirob ',
-          'rule' => '$ <indirob>'
-        }
-      ],
-      'sym' => 'scalar',
-      'type' => 'nonterm'
+    $NOTOP1 = {
+      'sym' => 'NOTOP',
+      'type' => 'right'
     };
   */
 
-  "scalar"         : [
-		       "$ <indirob>",
+  "NOTOP"          : [
+		       /NOTOP/i,
 		     ],
   /*
-    $ary1 = {
-      'rules' => [
-        {
-          'code' => '{ $$ = newAVREF($2) if ($$) $$->op_private |= $1 } ',
-          'comment' => '',
-          'line' => ' \'@\' indirob { $$ = newAVREF($2) if ($$) $$->op_private |= $1 } ',
-          'raw_rule' => ' \'@\' indirob ',
-          'rule' => '@ <indirob>'
-        }
-      ],
-      'sym' => 'ary',
-      'type' => 'nonterm'
+    $','1 = {
+      'sym' => '\',\'',
+      'type' => 'left'
     };
   */
 
-  "ary"            : [
-		       "@ <indirob>",
+  "','"            : [
+		       /,/i,
 		     ],
   /*
-    $hsh1 = {
-      'rules' => [
-        {
-          'code' => '{ $$ = newHVREF($2) if ($$) $$->op_private |= $1 } ',
-          'comment' => '',
-          'line' => ' \'%\' indirob { $$ = newHVREF($2) if ($$) $$->op_private |= $1 } ',
-          'raw_rule' => ' \'%\' indirob ',
-          'rule' => '% <indirob>'
-        }
-      ],
-      'sym' => 'hsh',
-      'type' => 'nonterm'
+    $ASSIGNOP1 = {
+      'sym' => 'ASSIGNOP',
+      'type' => 'right'
     };
   */
 
-  "hsh"            : [
-		       "% <indirob>",
+  "ASSIGNOP"       : [
+		       /ASSIGNOP/i,
 		     ],
   /*
-    $arylen1 = {
-      'rules' => [
-        {
-          'code' => '{ $$ = newAVREF($2); } ',
-          'comment' => '',
-          'line' => ' DOLSHARP indirob { $$ = newAVREF($2); } ',
-          'raw_rule' => ' DOLSHARP indirob ',
-          'rule' => '<DOLSHARP> <indirob>'
-        },
-        {
-          'code' => '{ $$ = newAVREF($1); } ',
-          'comment' => '',
-          'line' => ' term ARROW DOLSHARP \'*\' { $$ = newAVREF($1); } ',
-          'raw_rule' => ' term ARROW DOLSHARP \'*\' ',
-          'rule' => '<term> <ARROW> <DOLSHARP> *'
-        }
-      ],
-      'sym' => 'arylen',
-      'type' => 'nonterm'
+    $'?'1 = {
+      'sym' => '\'?\'',
+      'type' => 'right'
     };
   */
 
-  "arylen"         : [
-		       "<DOLSHARP> <indirob>",
-		       "<term> <ARROW> <DOLSHARP> *",
+  "'?'"            : [
+		       /[?]/i,
 		     ],
   /*
-    $star1 = {
-      'rules' => [
-        {
-          'code' => '{ $$ = newGVREF(0,$2); } ',
-          'comment' => '',
-          'line' => ' \'*\' indirob { $$ = newGVREF(0,$2); } ',
-          'raw_rule' => ' \'*\' indirob ',
-          'rule' => '* <indirob>'
-        }
-      ],
-      'sym' => 'star',
-      'type' => 'nonterm'
+    $':'1 = {
+      'sym' => '\':\'',
+      'type' => 'right'
     };
   */
 
-  "star"           : [
-		       "* <indirob>",
+  "':'"            : [
+		       /:/i,
 		     ],
   /*
-    $sliceme1 = {
-      'rules' => [
-        {
-          'code' => '',
-          'comment' => '',
-          'line' => ' ary ',
-          'raw_rule' => ' ary',
-          'rule' => '<ary>'
-        },
-        {
-          'code' => '{ $$ = newAVREF($1); } ',
-          'comment' => '',
-          'line' => ' term ARROW \'@\' { $$ = newAVREF($1); } ',
-          'raw_rule' => ' term ARROW \'@\' ',
-          'rule' => '<term> <ARROW> @'
-        }
-      ],
-      'sym' => 'sliceme',
-      'type' => 'nonterm'
+    $OROR1 = {
+      'sym' => 'OROR',
+      'type' => 'left'
     };
   */
 
-  "sliceme"        : [
-		       "<ary>",
-		       "<term> <ARROW> @",
+  "OROR"           : [
+		       /OROR/i,
 		     ],
   /*
-    $kvslice1 = {
-      'rules' => [
-        {
-          'code' => '',
-          'comment' => '',
-          'line' => ' hsh ',
-          'raw_rule' => ' hsh',
-          'rule' => '<hsh>'
-        },
-        {
-          'code' => '{ $$ = newHVREF($1); } ',
-          'comment' => '',
-          'line' => ' term ARROW \'%\' { $$ = newHVREF($1); } ',
-          'raw_rule' => ' term ARROW \'%\' ',
-          'rule' => '<term> <ARROW> %'
-        }
-      ],
-      'sym' => 'kvslice',
-      'type' => 'nonterm'
+    $DORDOR1 = {
+      'sym' => 'DORDOR',
+      'type' => 'left'
     };
   */
 
-  "kvslice"        : [
-		       "<hsh>",
-		       "<term> <ARROW> %",
+  "DORDOR"         : [
+		       /DORDOR/i,
 		     ],
   /*
-    $gelem1 = {
-      'rules' => [
-        {
-          'code' => '',
-          'comment' => '',
-          'line' => ' star ',
-          'raw_rule' => ' star',
-          'rule' => '<star>'
-        },
-        {
-          'code' => '{ $$ = newGVREF(0,$1); } ',
-          'comment' => '',
-          'line' => ' term ARROW \'*\' { $$ = newGVREF(0,$1); } ',
-          'raw_rule' => ' term ARROW \'*\' ',
-          'rule' => '<term> <ARROW> *'
-        }
-      ],
-      'sym' => 'gelem',
-      'type' => 'nonterm'
+    $ANDAND1 = {
+      'sym' => 'ANDAND',
+      'type' => 'left'
     };
   */
 
-  "gelem"          : [
-		       "<star>",
-		       "<term> <ARROW> *",
+  "ANDAND"         : [
+		       /ANDAND/i,
 		     ],
   /*
-    $indirob1 = {
-      'rules' => [
-        {
-          'code' => '{ $$ = scalar($1); } ',
-          'comment' => '',
-          'line' => ' WORD { $$ = scalar($1); } ',
-          'raw_rule' => ' WORD ',
-          'rule' => '<WORD>'
-        },
-        {
-          'code' => '{ $$ = scalar($1); } ',
-          'comment' => '',
-          'line' => ' scalar %prec PREC_LOW { $$ = scalar($1); } ',
-          'raw_rule' => ' scalar %prec PREC_LOW ',
-          'rule' => '<scalar> {prec PREC_LOW}'
-        },
-        {
-          'code' => '{ $$ = op_scope($1); } ',
-          'comment' => '',
-          'line' => ' block { $$ = op_scope($1); } ',
-          'raw_rule' => ' block ',
-          'rule' => '<block>'
-        },
-        {
-          'code' => '{ $$ = $1; } ',
-          'comment' => '',
-          'line' => ' PRIVATEREF { $$ = $1; } ',
-          'raw_rule' => ' PRIVATEREF ',
-          'rule' => '<PRIVATEREF>'
-        }
-      ],
-      'sym' => 'indirob',
-      'type' => 'nonterm'
+    $BITOROP1 = {
+      'sym' => 'BITOROP',
+      'type' => 'left'
     };
   */
 
-  "indirob"        : [
-		       "<WORD>",
-		       "<scalar> {prec PREC_LOW}",
-		       "<block>",
-		       "<PRIVATEREF>",
+  "BITOROP"        : [
+		       /BITOROP/i,
+		     ],
+  /*
+    $BITANDOP1 = {
+      'sym' => 'BITANDOP',
+      'type' => 'left'
+    };
+  */
+
+  "BITANDOP"       : [
+		       /BITANDOP/i,
+		     ],
+  /*
+    $SHIFTOP1 = {
+      'sym' => 'SHIFTOP',
+      'type' => 'left'
+    };
+  */
+
+  "SHIFTOP"        : [
+		       /SHIFTOP/i,
+		     ],
+  /*
+    $MATCHOP1 = {
+      'sym' => 'MATCHOP',
+      'type' => 'left'
+    };
+  */
+
+  "MATCHOP"        : [
+		       /MATCHOP/i,
+		     ],
+  /*
+    $'!'1 = {
+      'sym' => '\'!\'',
+      'type' => 'right'
+    };
+  */
+
+  "'!'"            : [
+		       /!/i,
+		     ],
+  /*
+    $'~'1 = {
+      'sym' => '\'~\'',
+      'type' => 'right'
+    };
+  */
+
+  "'~'"            : [
+		       /~/i,
+		     ],
+  /*
+    $UMINUS1 = {
+      'sym' => 'UMINUS',
+      'type' => 'right'
+    };
+  */
+
+  "UMINUS"         : [
+		       /UMINUS/i,
+		     ],
+  /*
+    $REFGEN1 = {
+      'sym' => 'REFGEN',
+      'type' => 'right'
+    };
+  */
+
+  "REFGEN"         : [
+		       /REFGEN/i,
+		     ],
+  /*
+    $POWOP1 = {
+      'sym' => 'POWOP',
+      'type' => 'right'
+    };
+  */
+
+  "POWOP"          : [
+		       /POWOP/i,
+		     ],
+  /*
+    $PREINC1 = {
+      'sym' => 'PREINC',
+      'type' => 'nonassoc'
+    };
+  */
+
+  "PREINC"         : [
+		       /PREINC/i,
+		     ],
+  /*
+    $PREDEC1 = {
+      'sym' => 'PREDEC',
+      'type' => 'nonassoc'
+    };
+  */
+
+  "PREDEC"         : [
+		       /PREDEC/i,
+		     ],
+  /*
+    $POSTINC1 = {
+      'sym' => 'POSTINC',
+      'type' => 'nonassoc'
+    };
+  */
+
+  "POSTINC"        : [
+		       /POSTINC/i,
+		     ],
+  /*
+    $POSTDEC1 = {
+      'sym' => 'POSTDEC',
+      'type' => 'nonassoc'
+    };
+  */
+
+  "POSTDEC"        : [
+		       /POSTDEC/i,
+		     ],
+  /*
+    $POSTJOIN1 = {
+      'sym' => 'POSTJOIN',
+      'type' => 'nonassoc'
+    };
+  */
+
+  "POSTJOIN"       : [
+		       /POSTJOIN/i,
+		     ],
+  /*
+    $ARROW1 = {
+      'sym' => 'ARROW',
+      'type' => 'left'
+    };
+  */
+
+  "ARROW"          : [
+		       /ARROW/i,
+		     ],
+  /*
+    $')'1 = {
+      'sym' => '\')\'',
+      'type' => 'nonassoc'
+    };
+  */
+
+  "')'"            : [
+		       /[)]/i,
+		     ],
+  /*
+    $'('1 = {
+      'sym' => '\'(\'',
+      'type' => 'left'
+    };
+  */
+
+  "'('"            : [
+		       /[(]/i,
 		     ],
 };
 
