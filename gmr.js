@@ -1435,7 +1435,7 @@ grammar = {
           'comment' => '',
           'line' => ' \'%\' indirob { $$ = newHVREF($2) if ($$) $$->op_private |= $1 } ',
           'raw_rule' => ' % indirob ',
-          'rule' => '{ indirob}'
+          'rule' => '% <indirob>'
         }
       ],
       'sym' => 'hsh',
@@ -1444,7 +1444,7 @@ grammar = {
   */
 
   "hsh"            : [
-		       "{ indirob}",
+		       "% <indirob>",
 		     ],
   /*
     $arylen1 = {
@@ -1628,7 +1628,7 @@ grammar = {
           'comment' => '',
           'line' => ' term ARROW \'%\' { $$ = newHVREF($1); } ',
           'raw_rule' => ' term ARROW % ',
-          'rule' => '<term> <ARROW> { }'
+          'rule' => '<term> <ARROW> %'
         }
       ],
       'sym' => 'kvslice',
@@ -1638,7 +1638,7 @@ grammar = {
 
   "kvslice"        : [
 		       "<hsh>",
-		       "<term> <ARROW> { }",
+		       "<term> <ARROW> %",
 		     ],
   /*
     $gelem1 = {
@@ -2936,7 +2936,7 @@ grammar = {
           'comment' => '',
           'line' => ' term ARROW \'%\' \'*\' { $$ = newHVREF($1); } ',
           'raw_rule' => ' term ARROW % * ',
-          'rule' => '<term> <ARROW> { *}'
+          'rule' => '<term> <ARROW> % *'
         },
         {
           'code' => '{ $$ = newUNOP(OP_ENTERSUB, 0, scalar(newCVREF($3,$1))); } ',
@@ -3145,7 +3145,7 @@ grammar = {
 		       "<NOAMP> <subname> <optlistexpr>",
 		       "<term> <ARROW> $ *",
 		       "<term> <ARROW> @ *",
-		       "<term> <ARROW> { *}",
+		       "<term> <ARROW> % *",
 		       "<term> <ARROW> & *",
 		       "<term> <ARROW> * * {prec (}",
 		       "<LOOPEX>",

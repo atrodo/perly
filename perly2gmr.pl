@@ -190,9 +190,9 @@ while (<>)
           if ($term eq '')
           {
           }
-          elsif ($term =~ m/^% (.*) $/xms)
+          elsif ($term =~ m/^% prec $/xms)
           {
-            push @$result, "{$1 " . shift(@terms) . "}";
+            push @$result, "{prec " . shift(@terms) . "}";
           }
           elsif ( $term =~ m/(['"])(.*)\1/xms)
           {
