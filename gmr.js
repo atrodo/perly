@@ -210,7 +210,112 @@ grammar = {
   */
 
   "THING"          : [
-		       /THING/i,
+                       /\d(_?\d)*(\.(\d(_?\d)*)?)?[Ee][\+\-]?(\d(_?\d)*)/i,
+                       /\.\d(_?\d)*[Ee][\+\-]?(\d(_?\d)*)/i,
+                       /0b[01](_?[01])*/i,
+                       /0[0-7](_?[0-7])*/i,
+                       /0x[0-9A-Fa-f](_?[0-9A-Fa-f])*/i,
+                       /0x[0-9A-Fa-f](_?[0-9A-Fa-f])*(?:\.\d*)?p[+-]?[0-9]+/i,
+                       /inf/i,
+                       /nan/i,
+                       function str_scan(input)
+                       {
+                         var tmp = input.dup();
+                         var spaces = /^\s*/.exec(tmp);
+                         tmp.index += spaces[0].length;
+                         tmp = tmp.toString();
+
+                         var delim;
+                         var mean;
+                         switch (tmp[0])
+                         {
+                           case "'":
+                           case '"':
+                           case '/':
+                             delim = 0;
+                             mean  = tmp[0];
+                             break;
+                           case 'm':
+                           case 's':
+                           case 'y':
+                             delim = 1;
+                             mean  = tmp[0];
+                             break;
+                           case 't':
+                             if (tmp[1] == 'r')
+                             {
+                               delim = 2;
+                               mean  = 'tr';
+                             }
+                             break;
+                           case 'q':
+                             switch (tmp[1])
+                             {
+                               case 'q':
+                               case 'w':
+                               case 'r':
+                                 delim = 2;
+                                 mean  = tmp[0] + tmp[1];
+                                 break;
+                               default:
+                                 delim = 1;
+                                 mean  = "q";
+                             }
+                             break;
+                         };
+
+                         if (delim == null)
+                         {
+                           return false;
+                         }
+
+                         while (/\s/.test(tmp[delim]))
+                         {
+                           delim++;
+                         }
+
+                         var i = delim;
+                         var open = tmp[delim];
+                         var close = open;
+
+                         var inverts = "([{< )]}> )]}>";
+                         var n = inverts.indexOf(open);
+                         if (n != -1)
+                         {
+                           close = inverts[n + 5];
+                         }
+
+                         var stack = [close];
+                         var cont = true;
+                         var result = '';
+                         while( stack.length)
+                         {
+                           i++;
+                           if ( i > tmp.length)
+                           {
+                             throw "Unterminated string, started at: " + input.short;
+                           }
+
+                           if (close != open && tmp[i] == open)
+                           {
+                             stack.unshift(close);
+                             continue;
+                           }
+                           if (tmp[i] == stack[0])
+                           {
+                             stack.shift();
+                           }
+                           if (tmp[i] == '\\')
+                           {
+                             i++;
+                           }
+                           if (stack.length > 0)
+                           {
+                             result[result.length] = tmp[i];
+                           }
+                         }
+                         return spaces[0].length + i + 1;
+                       }
 		     ],
   /*
     $PMFUNC1 = {
@@ -650,7 +755,7 @@ grammar = {
   */
 
   "MY"             : [
-		       /MY/i,
+		       /(?:MY|OUR|STATE)/i,
 		     ],
   /*
     $REQUIRE1 = {
@@ -1120,8 +1225,8 @@ grammar = {
 		       "<FORMAT> <startformsub> <formname> <formblock>",
 		       "<SUB> <subname> <startsub> <proto> <subattrlist> <optsubbody>",
 		       "<SUB> <subname> <startsub> <remember> <subsignature> <subattrlist> { <stmtseq> }",
-		       "<PACKAGE> <WORD> <WORD> ;",
-		       "<USE> <startsub> <WORD> <WORD> <optlistexpr> ;",
+		       "<PACKAGE> <PKGWORD> <WORD>? ;",
+		       "<USE> <startsub> <PKGWORD> <WORD>? <listexpr>? ;",
 		       "<IF> ( <remember> <mexpr> ) <mblock> <else>",
 		       "<UNLESS> ( <remember> <miexpr> ) <mblock> <else>",
 		       "<GIVEN> ( <remember> <mexpr> ) <mblock>",
@@ -1136,7 +1241,7 @@ grammar = {
 		       "<FOR> <REFGEN> <refgen_topic> ( <remember> <mexpr> ) <mblock> <cont>",
 		       "<FOR> ( <remember> <mexpr> ) <mblock> <cont>",
 		       "<block> <cont>",
-		       "<PACKAGE> <WORD> <WORD> { <remember> <stmtseq> }",
+		       "<PACKAGE> <PKGWORD> <WORD>? { <remember> <stmtseq> }",
 		       "<sideff> ;",
 		       ";",
 		     ],
@@ -1255,16 +1360,6 @@ grammar = {
 		       "<expr> <OROP> <expr>",
 		       "<expr> <DOROP> <expr>",
 		       "<listexpr> {prec PREC_LOW}",
-		     ],
-  /*
-    $term1 = {
-      'sym' => 'term',
-      'type' => 'type'
-    };
-  */
-
-  "term"           : [
-		       /term/i,
 		     ],
   /*
     $subscripted1 = {
@@ -1951,7 +2046,7 @@ grammar = {
   */
 
   "indirob"        : [
-		       "<WORD>",
+		       "<PKGWORD>",
 		       "<scalar> {prec PREC_LOW}",
 		       "<block>",
 		       "<PRIVATEREF>",
@@ -3118,6 +3213,10 @@ grammar = {
 		     ],
 
   "term"           : [
+                       "<termstar>*",
+		     ],
+  "termstar"       : [
+                       "<termbinop>",
 		       "<termunop>",
 		       "<anonymous>",
 		       "<termdo>",
@@ -3312,7 +3411,7 @@ grammar = {
   */
 
   "ASSIGNOP"       : [
-		       /ASSIGNOP/i,
+		       /=/i,
 		     ],
   /*
     $'?'1 = {
