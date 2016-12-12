@@ -177,7 +177,7 @@ grammar = {
   */
 
   "PKGWORD"        : [
-                       /[A-Za-z0-9_](?:[A-Za-z0-9_]|::)+/i,
+                       /[A-Za-z0-9_](?:[A-Za-z0-9_]|::)*/i,
                      ],
   "WORD"           : [
 		       /[A-Za-z0-9_]+/i,
@@ -190,7 +190,7 @@ grammar = {
   */
 
   "METHOD"         : [
-		       /METHOD/i,
+		       "<PKGWORD>",
 		     ],
   /*
     $FUNCMETH1 = {
@@ -200,7 +200,7 @@ grammar = {
   */
 
   "FUNCMETH"       : [
-		       /FUNCMETH/i,
+		       "<PKGWORD>",
 		     ],
   /*
     $THING1 = {
@@ -268,7 +268,6 @@ grammar = {
                          {
                            return false;
                          }
-
                          while (/\s/.test(tmp[delim]))
                          {
                            delim++;
@@ -277,6 +276,12 @@ grammar = {
                          var i = delim;
                          var open = tmp[delim];
                          var close = open;
+
+                         if (/\w/.test(open))
+                         {
+                           return false;
+                         }
+
 
                          var inverts = "([{< )]}> )]}>";
                          var n = inverts.indexOf(open);
@@ -635,7 +640,13 @@ grammar = {
   */
 
   "FUNC"           : [
-		       /FUNC/i,
+		       "<PKGWORD>",
+		     ],
+  "FUNCTERM"       : [
+		       "<PKGWORD> <expr>",
+		       "<PKGWORD> ( )",
+		       "<PKGWORD> ( <expr> )",
+		       "<FUNC>",
 		     ],
   /*
     $UNIOP1 = {
@@ -1223,8 +1234,8 @@ grammar = {
   "barestmt"       : [
 		       "<PLUGSTMT>",
 		       "<FORMAT> <startformsub> <formname> <formblock>",
-		       "<SUB> <subname> <startsub> <proto> <subattrlist> <optsubbody>",
-		       "<SUB> <subname> <startsub> <remember> <subsignature> <subattrlist> { <stmtseq> }",
+		       //"<SUB> <subname> <startsub> <proto>? <subattrlist>? <optsubbody>",
+		       "<SUB> <subname> <startsub> <remember> <subsignature>? <subattrlist>? { <stmtseq> }",
 		       "<PACKAGE> <PKGWORD> <WORD>? ;",
 		       "<USE> <startsub> <PKGWORD> <WORD>? <listexpr>? ;",
 		       "<IF> ( <remember> <mexpr> ) <mblock> <else>",
@@ -1469,13 +1480,16 @@ grammar = {
   */
 
   "subscripted"    : [
-		       "<gelem> { <expr> ; }",
+                       "<subscripteditem>+",
+		     ],
+  "subscripteditem": [
+		       "<gelem> { <expr> }",
 		       "<scalar> [ <expr> ]",
 		       "<term> <ARROW> [ <expr> ]",
 		       "<subscripted> [ <expr> ]",
-		       "<scalar> { <expr> ; }",
-		       "<term> <ARROW> { <expr> ; }",
-		       "<subscripted> { <expr> ; }",
+		       "<scalar> { <expr> }",
+		       "<term> <ARROW> { <expr> }",
+		       "<subscripted> { <expr> }",
 		       "<term> <ARROW> ( )",
 		       "<term> <ARROW> ( <expr> )",
 		       "<subscripted> ( <expr> )",
@@ -1793,8 +1807,14 @@ grammar = {
   */
 
   "listexpr"       : [
+		       "<listexpritem>+",
+		     ],
+  "listexpritem"   : [
 		       "<listexpr> ,",
 		       "<listexpr> , <term>",
+		       "<listexpr> , <term>",
+                       "<WORD> => <listexpr>",
+                       "<listexpr> => <term>",
 		       "<term> {prec PREC_LOW}",
 		     ],
   /*
@@ -1978,8 +1998,7 @@ grammar = {
   */
 
   "optexpr"        : [
-		       "",
-		       "<expr>",
+		       "<expr>?",
 		     ],
   /*
     $optrepl1 = {
@@ -2482,8 +2501,7 @@ grammar = {
   */
 
   "myattrterm"     : [
-		       "<MY> <myterm> <myattrlist>",
-		       "<MY> <myterm>",
+		       "<MY> <myterm> <myattrlist>?",
 		     ],
   /*
     $myterm1 = {
@@ -3213,9 +3231,9 @@ grammar = {
 		     ],
 
   "term"           : [
-                       "<termstar>*",
+                       "<termitem>+",
 		     ],
-  "termstar"       : [
+  "termitem"       : [
                        "<termbinop>",
 		       "<termunop>",
 		       "<anonymous>",
@@ -3227,45 +3245,35 @@ grammar = {
 		       "( <expr> )",
 		       "<QWLIST>",
 		       "( )",
+		       "<subscripted>",
 		       "<scalar> {prec (}",
 		       "<star> {prec (}",
 		       "<hsh> {prec (}",
 		       "<ary> {prec (}",
 		       "<arylen> {prec (}",
-		       "<subscripted>",
 		       "<sliceme> [ <expr> ]",
 		       "<kvslice> [ <expr> ]",
 		       "<sliceme> { <expr> ; }",
 		       "<kvslice> { <expr> ; }",
 		       "<THING> {prec (}",
-		       "<amper>",
 		       "<amper> ( )",
 		       "<amper> ( <expr> )",
+		       "<amper>",
 		       "<NOAMP> <subname> <optlistexpr>",
 		       "<term> <ARROW> $ *",
 		       "<term> <ARROW> @ *",
 		       "<term> <ARROW> % *",
 		       "<term> <ARROW> & *",
 		       "<term> <ARROW> * * {prec (}",
-		       "<LOOPEX>",
 		       "<LOOPEX> <term>",
+		       "<LOOPEX>",
 		       "<NOTOP> <listexpr>",
-		       "<UNIOP>",
 		       "<UNIOP> <block>",
 		       "<UNIOP> <term>",
-		       "<REQUIRE>",
+		       "<UNIOP>",
 		       "<REQUIRE> <term>",
-		       "<UNIOPSUB>",
-		       "<UNIOPSUB> <term>",
-		       "<FUNC0>",
-		       "<FUNC0> ( )",
-		       "<FUNC0OP>",
-		       "<FUNC0OP> ( )",
-		       "<FUNC0SUB>",
-		       "<FUNC1> ( )",
-		       "<FUNC1> ( <expr> )",
-		       "<PMFUNC> ( <listexpr> <optrepl> )",
-		       "<WORD>",
+                       "<FUNCTERM>",
+		       "<PKGWORD>",
 		       "<listop>",
 		       "<YADAYADA>",
 		       "<PLUGEXPR>",
@@ -3412,6 +3420,10 @@ grammar = {
 
   "ASSIGNOP"       : [
 		       /=/i,
+                       /(?:[*][*]|[+]|[*]|[-]|[\/]|[%])=/,
+                       /(?:[&]|[|]|[^]|[<][<]|[>][>])=/,
+                       /(?:[&][&]|[|][|]|[\/][\/])=/,
+                       /(?:[.]|[&][.]|[|][.]|[^][.]|[x])=/,
 		     ],
   /*
     $'?'1 = {
@@ -3611,7 +3623,7 @@ grammar = {
   */
 
   "ARROW"          : [
-		       /ARROW/i,
+		       /->/i,
 		     ],
   /*
     $')'1 = {
