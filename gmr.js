@@ -1,4 +1,20 @@
 grammar = {
+  $ws_trim: function(input)
+  {
+    var re = /^(\s*(?:#.*?[\n\r\u2028\u2029]))/;
+    var result = 0;
+    var comment;
+    var working = input.dup();
+
+    while (comment = re.exec(working))
+    {
+      result += comment[0].length;
+      working.advance(comment[0].length);
+      console.log(input.indent + 'ws :' + comment[0].replace(/\n/g, "\\n"));
+    }
+    return result;
+  },
+
   /*
     $GRAMPROG1 = {
       'sym' => 'GRAMPROG',
@@ -59,122 +75,6 @@ grammar = {
   "GRAMSTMTSEQ"    : [
 		       /GRAMSTMTSEQ/i,
 		     ],
-  /*
-    $'{'1 = {
-      'sym' => '\'{\'',
-      'type' => 'left'
-    };
-  */
-
-  "'{'"            : [
-		       /[{]/i,
-		     ],
-  /*
-    $'}'1 = {
-      'sym' => '\'}\'',
-      'type' => 'token'
-    };
-  */
-
-  "'}'"            : [
-		       /[}]/i,
-		     ],
-  /*
-    $'['1 = {
-      'sym' => '\'[\'',
-      'type' => 'left'
-    };
-  */
-
-  "'['"            : [
-		       /[[]/i,
-		     ],
-  /*
-    $']'1 = {
-      'sym' => '\']\'',
-      'type' => 'token'
-    };
-  */
-
-  "']'"            : [
-		       /[]]/i,
-		     ],
-  /*
-    $'-'1 = {
-      'sym' => '\'-\'',
-      'type' => 'token'
-    };
-  */
-
-  "'-'"            : [
-		       /-/i,
-		     ],
-  /*
-    $'+'1 = {
-      'sym' => '\'+\'',
-      'type' => 'token'
-    };
-  */
-
-  "'+'"            : [
-		       /[+]/i,
-		     ],
-  /*
-    $'@'1 = {
-      'sym' => '\'@\'',
-      'type' => 'token'
-    };
-  */
-
-  "'@'"            : [
-		       /@/i,
-		     ],
-  /*
-    $'%'1 = {
-      'sym' => '\'%\'',
-      'type' => 'token'
-    };
-  */
-
-  "'%'"            : [
-		       /%/i,
-		     ],
-  /*
-    $'&'1 = {
-      'sym' => '\'&\'',
-      'type' => 'token'
-    };
-  */
-
-  "'&'"            : [
-		       /&/i,
-		     ],
-  /*
-    $'='1 = {
-      'sym' => '\'=\'',
-      'type' => 'token'
-    };
-  */
-
-  "'='"            : [
-		       /=/i,
-		     ],
-  /*
-    $'.'1 = {
-      'sym' => '\'.\'',
-      'type' => 'token'
-    };
-  */
-
-  "'.'"            : [
-		       /[.]/i,
-		     ],
-  /*
-    $WORD1 = {
-      'sym' => 'WORD',
-      'type' => 'token'
-    };
-  */
 
   "PKGWORD"        : [
                        /[A-Za-z0-9_](?:[A-Za-z0-9_]|::)*/i,
@@ -222,43 +122,43 @@ grammar = {
                        {
                          var tmp = input.dup();
                          var spaces = /^\s*/.exec(tmp);
-                         tmp.index += spaces[0].length;
+                         var i = spaces[0].length;
                          tmp = tmp.toString();
 
                          var delim;
                          var mean;
-                         switch (tmp[0])
+                         switch (tmp[i])
                          {
                            case "'":
                            case '"':
                            case '/':
-                             delim = 0;
-                             mean  = tmp[0];
+                             delim = i;
+                             mean  = tmp[i];
                              break;
                            case 'm':
                            case 's':
                            case 'y':
-                             delim = 1;
-                             mean  = tmp[0];
+                             delim = i+1;
+                             mean  = tmp[i];
                              break;
                            case 't':
-                             if (tmp[1] == 'r')
+                             if (tmp[i+1] == 'r')
                              {
-                               delim = 2;
+                               delim = i+2;
                                mean  = 'tr';
                              }
                              break;
                            case 'q':
-                             switch (tmp[1])
+                             switch (tmp[i+1])
                              {
                                case 'q':
                                case 'w':
                                case 'r':
-                                 delim = 2;
-                                 mean  = tmp[0] + tmp[1];
+                                 delim = i+2;
+                                 mean  = tmp[i+0] + tmp[i+1];
                                  break;
                                default:
-                                 delim = 1;
+                                 delim = i+1;
                                  mean  = "q";
                              }
                              break;
@@ -298,7 +198,8 @@ grammar = {
                            i++;
                            if ( i > tmp.length)
                            {
-                             throw "Unterminated string, started at: " + input.short;
+                             //throw "Unterminated string, started at: " + input.short;
+                             return false;
                            }
 
                            if (close != open && tmp[i] == open)
@@ -319,7 +220,7 @@ grammar = {
                              result[result.length] = tmp[i];
                            }
                          }
-                         return spaces[0].length + i + 1;
+                         return i + 1;
                        }
 		     ],
   /*
@@ -430,7 +331,7 @@ grammar = {
   */
 
   "FORMAT"         : [
-		       /FORMAT/i,
+		       /FORMAT\b/i,
 		     ],
   /*
     $SUB1 = {
@@ -440,7 +341,7 @@ grammar = {
   */
 
   "SUB"            : [
-		       /SUB/i,
+		       /SUB\b/i,
 		     ],
   /*
     $ANONSUB1 = {
@@ -450,7 +351,7 @@ grammar = {
   */
 
   "ANONSUB"        : [
-		       /ANONSUB/i,
+		       "",
 		     ],
   /*
     $PACKAGE1 = {
@@ -460,7 +361,7 @@ grammar = {
   */
 
   "PACKAGE"        : [
-		       /PACKAGE/i,
+		       /PACKAGE\b/i,
 		     ],
   /*
     $USE1 = {
@@ -470,7 +371,7 @@ grammar = {
   */
 
   "USE"            : [
-		       /USE/i,
+		       /USE\b/i,
 		     ],
   /*
     $WHILE1 = {
@@ -480,7 +381,7 @@ grammar = {
   */
 
   "WHILE"          : [
-		       /WHILE/i,
+		       /WHILE\b/i,
 		     ],
   /*
     $UNTIL1 = {
@@ -490,7 +391,7 @@ grammar = {
   */
 
   "UNTIL"          : [
-		       /UNTIL/i,
+		       /UNTIL\b/i,
 		     ],
   /*
     $IF1 = {
@@ -500,7 +401,7 @@ grammar = {
   */
 
   "IF"             : [
-		       /IF/i,
+		       /IF\b/i,
 		     ],
   /*
     $UNLESS1 = {
@@ -510,7 +411,7 @@ grammar = {
   */
 
   "UNLESS"         : [
-		       /UNLESS/i,
+		       /UNLESS\b/i,
 		     ],
   /*
     $ELSE1 = {
@@ -520,7 +421,7 @@ grammar = {
   */
 
   "ELSE"           : [
-		       /ELSE/i,
+		       /ELSE\b/i,
 		     ],
   /*
     $ELSIF1 = {
@@ -530,7 +431,7 @@ grammar = {
   */
 
   "ELSIF"          : [
-		       /ELSIF/i,
+		       /ELSIF\b/i,
 		     ],
   /*
     $CONTINUE1 = {
@@ -540,7 +441,7 @@ grammar = {
   */
 
   "CONTINUE"       : [
-		       /CONTINUE/i,
+		       /CONTINUE\b/i,
 		     ],
   /*
     $FOR1 = {
@@ -550,7 +451,8 @@ grammar = {
   */
 
   "FOR"            : [
-		       /FOR/i,
+		       /FOREACH\b/i,
+		       /FOR\b/i,
 		     ],
   /*
     $GIVEN1 = {
@@ -560,7 +462,7 @@ grammar = {
   */
 
   "GIVEN"          : [
-		       /GIVEN/i,
+		       /GIVEN\b/i,
 		     ],
   /*
     $WHEN1 = {
@@ -570,7 +472,7 @@ grammar = {
   */
 
   "WHEN"           : [
-		       /WHEN/i,
+		       /WHEN\b/i,
 		     ],
   /*
     $DEFAULT1 = {
@@ -580,7 +482,7 @@ grammar = {
   */
 
   "DEFAULT"        : [
-		       /DEFAULT/i,
+		       /DEFAULT\b/i,
 		     ],
   /*
     $LOOPEX1 = {
@@ -643,10 +545,10 @@ grammar = {
 		       "<PKGWORD>",
 		     ],
   "FUNCTERM"       : [
-		       "<PKGWORD> <expr>",
+                       "<PKGWORD>",
 		       "<PKGWORD> ( )",
+		       "<PKGWORD> <expr>",
 		       "<PKGWORD> ( <expr> )",
-		       "<FUNC>",
 		     ],
   /*
     $UNIOP1 = {
@@ -676,7 +578,14 @@ grammar = {
   */
 
   "RELOP"          : [
-		       /RELOP/i,
+		       /[<]/i,
+		       /[<][=]/i,
+		       /[>]/i,
+		       /[>][=]/i,
+		       /lt/i,
+		       /gt/i,
+		       /le/i,
+		       /ge/i,
 		     ],
   /*
     $EQOP1 = {
@@ -686,7 +595,13 @@ grammar = {
   */
 
   "EQOP"           : [
-		       /EQOP/i,
+		       /[=][=]/i,
+		       /[!][=]/i,
+		       /[<][=][>]/i,
+		       /eq/i,
+		       /ne/i,
+		       /cmp/i,
+		       /[~][~]/i,
 		     ],
   /*
     $MULOP1 = {
@@ -696,7 +611,10 @@ grammar = {
   */
 
   "MULOP"          : [
-		       /MULOP/i,
+		       /[*]/i,
+		       /[/]/i,
+		       /[%]/i,
+		       /[x]/i,
 		     ],
   /*
     $ADDOP1 = {
@@ -706,7 +624,232 @@ grammar = {
   */
 
   "ADDOP"          : [
-		       /ADDOP/i,
+		       /[+]/i,
+		       /[-]/i,
+		       /[.]/i,
+		     ],
+  /*
+    $PREC_LOW1 = {
+      'sym' => 'PREC_LOW',
+      'type' => 'nonassoc'
+    };
+  */
+
+  "PREC_LOW"       : [
+		       ///PREC_LOW/i,
+		     ],
+  /*
+    $OROP1 = {
+      'sym' => 'OROP',
+      'type' => 'left'
+    };
+  */
+
+  "OROP"           : [
+		       /OR\b/i,
+		     ],
+  /*
+    $DOROP1 = {
+      'sym' => 'DOROP',
+      'type' => 'left'
+    };
+  */
+
+  "DOROP"          : [
+		     ],
+  /*
+    $ANDOP1 = {
+      'sym' => 'ANDOP',
+      'type' => 'left'
+    };
+  */
+
+  "ANDOP"          : [
+		       /AND\b/i,
+		     ],
+  /*
+    $NOTOP1 = {
+      'sym' => 'NOTOP',
+      'type' => 'right'
+    };
+  */
+
+  "NOTOP"          : [
+		       /NOT\b/i,
+		     ],
+  /*
+    $ASSIGNOP1 = {
+      'sym' => 'ASSIGNOP',
+      'type' => 'right'
+    };
+  */
+
+  "ASSIGNOP"       : [
+		       '=',
+                       /(?:[*][*]|[+]|[*]|[-]|[\/]|[%])=/,
+                       /(?:[&]|[|]|^|[<][<]|[>][>])=/,
+                       /(?:[&][&]|[|][|]|[\/][\/])=/,
+                       /(?:[.]|[&][.]|[|][.]|^[.]|[x])=/,
+		     ],
+  /*
+    $OROR1 = {
+      'sym' => 'OROR',
+      'type' => 'left'
+    };
+  */
+
+  "OROR"           : [
+		       /[|][|]/i,
+		     ],
+  /*
+    $DORDOR1 = {
+      'sym' => 'DORDOR',
+      'type' => 'left'
+    };
+  */
+
+  "DORDOR"         : [
+		       /[/][/]/i,
+		     ],
+  /*
+    $ANDAND1 = {
+      'sym' => 'ANDAND',
+      'type' => 'left'
+    };
+  */
+
+  "ANDAND"         : [
+		       /[&][&]/i,
+		     ],
+  /*
+    $BITOROP1 = {
+      'sym' => 'BITOROP',
+      'type' => 'left'
+    };
+  */
+
+  "BITOROP"        : [
+		       /[|]/i,
+		     ],
+  /*
+    $BITANDOP1 = {
+      'sym' => 'BITANDOP',
+      'type' => 'left'
+    };
+  */
+
+  "BITANDOP"       : [
+		       /[&]/i,
+		     ],
+  /*
+    $SHIFTOP1 = {
+      'sym' => 'SHIFTOP',
+      'type' => 'left'
+    };
+  */
+
+  "SHIFTOP"        : [
+		       /[>][>]/i,
+		     ],
+  /*
+    $MATCHOP1 = {
+      'sym' => 'MATCHOP',
+      'type' => 'left'
+    };
+  */
+
+  "MATCHOP"        : [
+		       /[=][~]/i,
+		     ],
+  /*
+    $UMINUS1 = {
+      'sym' => 'UMINUS',
+      'type' => 'right'
+    };
+  */
+
+  "UMINUS"         : [
+		       /[-]/i,
+		     ],
+  /*
+    $REFGEN1 = {
+      'sym' => 'REFGEN',
+      'type' => 'right'
+    };
+  */
+
+  "REFGEN"         : [
+		       /\\/i,
+		     ],
+  /*
+    $POWOP1 = {
+      'sym' => 'POWOP',
+      'type' => 'right'
+    };
+  */
+
+  "POWOP"          : [
+		       /[*][*]/i,
+		     ],
+  /*
+    $PREINC1 = {
+      'sym' => 'PREINC',
+      'type' => 'nonassoc'
+    };
+  */
+
+  "PREINC"         : [
+		       /[+][+]/i,
+		     ],
+  /*
+    $PREDEC1 = {
+      'sym' => 'PREDEC',
+      'type' => 'nonassoc'
+    };
+  */
+
+  "PREDEC"         : [
+		       /[-][-]/i,
+		     ],
+  /*
+    $POSTINC1 = {
+      'sym' => 'POSTINC',
+      'type' => 'nonassoc'
+    };
+  */
+
+  "POSTINC"        : [
+		       /[+][+]/i,
+		     ],
+  /*
+    $POSTDEC1 = {
+      'sym' => 'POSTDEC',
+      'type' => 'nonassoc'
+    };
+  */
+
+  "POSTDEC"        : [
+		       /[-][-]/i,
+		     ],
+  /*
+    $POSTJOIN1 = {
+      'sym' => 'POSTJOIN',
+      'type' => 'nonassoc'
+    };
+  */
+
+  "POSTJOIN"       : [
+		       /POSTJOIN/i,
+		     ],
+  /*
+    $ARROW1 = {
+      'sym' => 'ARROW',
+      'type' => 'left'
+    };
+  */
+
+  "ARROW"          : [
+		       /[-][>]/i,
 		     ],
   /*
     $DOLSHARP1 = {
@@ -726,7 +869,7 @@ grammar = {
   */
 
   "DO"             : [
-		       /DO/i,
+		       /DO\b/i,
 		     ],
   /*
     $HASHBRACK1 = {
@@ -776,7 +919,7 @@ grammar = {
   */
 
   "REQUIRE"        : [
-		       /REQUIRE/i,
+		       /REQUIRE\b/i,
 		     ],
   /*
     $COLONATTR1 = {
@@ -1005,7 +1148,7 @@ grammar = {
   */
 
   "stmtseq"        : [
-		       "<fullstmt>*",
+		       "<fullstmt>* <sideff>?",
 		     ],
   /*
     $fullstmt1 = {
@@ -1015,7 +1158,7 @@ grammar = {
           'comment' => '',
           'line' => ' barestmt { $$ = $1 ? newSTATEOP(0, NULL, $1) : NULL } ',
           'raw_rule' => ' barestmt ',
-          'rule' => '<barestmt>'
+        'rule' => '<barestmt>'
         },
         {
           'code' => '{ $$ = $1; } ',
@@ -1325,9 +1468,9 @@ grammar = {
   */
 
   "else"           : [
-		       "",
 		       "<ELSE> <mblock>",
 		       "<ELSIF> ( <mexpr> ) <mblock> <else>",
+		       "",
 		     ],
   /*
     $expr1 = {
@@ -1480,9 +1623,11 @@ grammar = {
   */
 
   "subscripted"    : [
+                       /*
                        "<subscripteditem>+",
 		     ],
   "subscripteditem": [
+                       */
 		       "<gelem> { <expr> }",
 		       "<scalar> [ <expr> ]",
 		       "<term> <ARROW> [ <expr> ]",
@@ -1807,9 +1952,11 @@ grammar = {
   */
 
   "listexpr"       : [
+                       /*
 		       "<listexpritem>+",
 		     ],
   "listexpritem"   : [
+                       */
 		       "<listexpr> ,",
 		       "<listexpr> , <term>",
 		       "<listexpr> , <term>",
@@ -1841,8 +1988,8 @@ grammar = {
   */
 
   "nexpr"          : [
-		       "",
 		       "<sideff>",
+		       "",
 		     ],
   /*
     $texpr1 = {
@@ -1868,8 +2015,8 @@ grammar = {
   */
 
   "texpr"          : [
-		       "",
 		       "<expr>",
+		       "",
 		     ],
   /*
     $iexpr1 = {
@@ -2681,6 +2828,7 @@ grammar = {
   */
 
   "termbinop"      : [
+                       "<term> <MATCHOP> <term>",
 		       "<term> <ASSIGNOP> <term>",
 		       "<term> <POWOP> <term>",
 		       "<term> <MULOP> <term>",
@@ -2694,7 +2842,6 @@ grammar = {
 		       "<term> <ANDAND> <term>",
 		       "<term> <OROR> <term>",
 		       "<term> <DORDOR> <term>",
-		       "<term> <MATCHOP> <term>",
 		     ],
   /*
     $termunop1 = {
@@ -2833,8 +2980,8 @@ grammar = {
   "anonymous"      : [
 		       "[ <expr> ]",
 		       "[ ]",
-		       "<HASHBRACK> <expr> ; } {prec (}",
-		       "<HASHBRACK> ; } {prec (}",
+		       "{ <expr> } {prec (}",
+		       "{ } {prec (}",
 		       "<ANONSUB> <startanonsub> <proto> <subattrlist> <block> {prec (}",
 		       "<ANONSUB> <startanonsub> <remember> <subsignature> <subattrlist> { <stmtseq> } {prec (}",
 		     ],
@@ -3227,18 +3374,23 @@ grammar = {
 
   "termdo"         : [
 		       "<DO> <term> {prec UNIOP}",
-		       "<DO> <block> {prec (} <term> : <termbinop>",
+		       "<DO> <block> {prec (}",
 		     ],
 
+  "ternary"        : [
+		       "<term> ? <term> : <term>",
+		     ],
   "term"           : [
+                       /*
                        "<termitem>+",
 		     ],
   "termitem"       : [
+                       */
                        "<termbinop>",
 		       "<termunop>",
 		       "<anonymous>",
 		       "<termdo>",
-		       "<term> ? <term> : <term>",
+		       "<ternary>",
 		       "<REFGEN> <term>",
 		       "<myattrterm> {prec UNIOP}",
 		       "<LOCAL> <term> {prec UNIOP}",
@@ -3350,300 +3502,6 @@ grammar = {
   "formarg"        : [
 		       "",
 		       "<FORMLBRACK> <stmtseq> <FORMRBRACK>",
-		     ],
-  /*
-    $PREC_LOW1 = {
-      'sym' => 'PREC_LOW',
-      'type' => 'nonassoc'
-    };
-  */
-
-  "PREC_LOW"       : [
-		       /PREC_LOW/i,
-		     ],
-  /*
-    $OROP1 = {
-      'sym' => 'OROP',
-      'type' => 'left'
-    };
-  */
-
-  "OROP"           : [
-		       /OROP/i,
-		     ],
-  /*
-    $DOROP1 = {
-      'sym' => 'DOROP',
-      'type' => 'left'
-    };
-  */
-
-  "DOROP"          : [
-		       /DOROP/i,
-		     ],
-  /*
-    $ANDOP1 = {
-      'sym' => 'ANDOP',
-      'type' => 'left'
-    };
-  */
-
-  "ANDOP"          : [
-		       /ANDOP/i,
-		     ],
-  /*
-    $NOTOP1 = {
-      'sym' => 'NOTOP',
-      'type' => 'right'
-    };
-  */
-
-  "NOTOP"          : [
-		       /NOTOP/i,
-		     ],
-  /*
-    $','1 = {
-      'sym' => '\',\'',
-      'type' => 'left'
-    };
-  */
-
-  "','"            : [
-		       /,/i,
-		     ],
-  /*
-    $ASSIGNOP1 = {
-      'sym' => 'ASSIGNOP',
-      'type' => 'right'
-    };
-  */
-
-  "ASSIGNOP"       : [
-		       /=/i,
-                       /(?:[*][*]|[+]|[*]|[-]|[\/]|[%])=/,
-                       /(?:[&]|[|]|[^]|[<][<]|[>][>])=/,
-                       /(?:[&][&]|[|][|]|[\/][\/])=/,
-                       /(?:[.]|[&][.]|[|][.]|[^][.]|[x])=/,
-		     ],
-  /*
-    $'?'1 = {
-      'sym' => '\'?\'',
-      'type' => 'right'
-    };
-  */
-
-  "'?'"            : [
-		       /[?]/i,
-		     ],
-  /*
-    $':'1 = {
-      'sym' => '\':\'',
-      'type' => 'right'
-    };
-  */
-
-  "':'"            : [
-		       /:/i,
-		     ],
-  /*
-    $OROR1 = {
-      'sym' => 'OROR',
-      'type' => 'left'
-    };
-  */
-
-  "OROR"           : [
-		       /OROR/i,
-		     ],
-  /*
-    $DORDOR1 = {
-      'sym' => 'DORDOR',
-      'type' => 'left'
-    };
-  */
-
-  "DORDOR"         : [
-		       /DORDOR/i,
-		     ],
-  /*
-    $ANDAND1 = {
-      'sym' => 'ANDAND',
-      'type' => 'left'
-    };
-  */
-
-  "ANDAND"         : [
-		       /ANDAND/i,
-		     ],
-  /*
-    $BITOROP1 = {
-      'sym' => 'BITOROP',
-      'type' => 'left'
-    };
-  */
-
-  "BITOROP"        : [
-		       /BITOROP/i,
-		     ],
-  /*
-    $BITANDOP1 = {
-      'sym' => 'BITANDOP',
-      'type' => 'left'
-    };
-  */
-
-  "BITANDOP"       : [
-		       /BITANDOP/i,
-		     ],
-  /*
-    $SHIFTOP1 = {
-      'sym' => 'SHIFTOP',
-      'type' => 'left'
-    };
-  */
-
-  "SHIFTOP"        : [
-		       /SHIFTOP/i,
-		     ],
-  /*
-    $MATCHOP1 = {
-      'sym' => 'MATCHOP',
-      'type' => 'left'
-    };
-  */
-
-  "MATCHOP"        : [
-		       /MATCHOP/i,
-		     ],
-  /*
-    $'!'1 = {
-      'sym' => '\'!\'',
-      'type' => 'right'
-    };
-  */
-
-  "'!'"            : [
-		       /!/i,
-		     ],
-  /*
-    $'~'1 = {
-      'sym' => '\'~\'',
-      'type' => 'right'
-    };
-  */
-
-  "'~'"            : [
-		       /~/i,
-		     ],
-  /*
-    $UMINUS1 = {
-      'sym' => 'UMINUS',
-      'type' => 'right'
-    };
-  */
-
-  "UMINUS"         : [
-		       /UMINUS/i,
-		     ],
-  /*
-    $REFGEN1 = {
-      'sym' => 'REFGEN',
-      'type' => 'right'
-    };
-  */
-
-  "REFGEN"         : [
-		       /REFGEN/i,
-		     ],
-  /*
-    $POWOP1 = {
-      'sym' => 'POWOP',
-      'type' => 'right'
-    };
-  */
-
-  "POWOP"          : [
-		       /POWOP/i,
-		     ],
-  /*
-    $PREINC1 = {
-      'sym' => 'PREINC',
-      'type' => 'nonassoc'
-    };
-  */
-
-  "PREINC"         : [
-		       /PREINC/i,
-		     ],
-  /*
-    $PREDEC1 = {
-      'sym' => 'PREDEC',
-      'type' => 'nonassoc'
-    };
-  */
-
-  "PREDEC"         : [
-		       /PREDEC/i,
-		     ],
-  /*
-    $POSTINC1 = {
-      'sym' => 'POSTINC',
-      'type' => 'nonassoc'
-    };
-  */
-
-  "POSTINC"        : [
-		       /POSTINC/i,
-		     ],
-  /*
-    $POSTDEC1 = {
-      'sym' => 'POSTDEC',
-      'type' => 'nonassoc'
-    };
-  */
-
-  "POSTDEC"        : [
-		       /POSTDEC/i,
-		     ],
-  /*
-    $POSTJOIN1 = {
-      'sym' => 'POSTJOIN',
-      'type' => 'nonassoc'
-    };
-  */
-
-  "POSTJOIN"       : [
-		       /POSTJOIN/i,
-		     ],
-  /*
-    $ARROW1 = {
-      'sym' => 'ARROW',
-      'type' => 'left'
-    };
-  */
-
-  "ARROW"          : [
-		       /->/i,
-		     ],
-  /*
-    $')'1 = {
-      'sym' => '\')\'',
-      'type' => 'nonassoc'
-    };
-  */
-
-  "')'"            : [
-		       /[)]/i,
-		     ],
-  /*
-    $'('1 = {
-      'sym' => '\'(\'',
-      'type' => 'left'
-    };
-  */
-
-  "'('"            : [
-		       /[(]/i,
 		     ],
 };
 
