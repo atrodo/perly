@@ -1,16 +1,71 @@
 grammar = {
   $ws_trim: function(input)
   {
-    var re = /^(\s*(?:#.*?[\n\r\u2028\u2029]))/;
+    var eol_re     = /^\s*[\n\r\u2028\u2029]/;
+    var comment_re = /^(\s*(?:#.*?[\n\r\u2028\u2029]))/;
+    var pod_re     = /^\s*[\n\r\u2028\u2029]=/;
+    var line_re    = /^.*[\n\r\u2028\u2029]/;
+    var pod_end_re = /^=cut\s*[\n\r\u2028\u2029]/;
     var result = 0;
     var comment;
     var working = input.dup();
+    var check_heredoc = false;
 
-    while (comment = re.exec(working))
+    while (1)
     {
-      result += comment[0].length;
-      working.advance(comment[0].length);
-      console.log(input.indent + 'ws :' + comment[0].replace(/\n/g, "\\n"));
+      if (check_heredoc)
+      {
+        if (input.lex_memory.heredoc == null)
+        {
+          input.lex_memory.heredoc = [];
+        }
+        if (input.lex_memory.heredoc.length == 0)
+        {
+          check_heredoc = false;
+          continue;
+        }
+
+        var heredoc = input.lex_memory.heredoc.shift();
+        var term_re = new RegExp('^' + heredoc.term + '[\n\r\u2028\u2029]');
+        while (comment = line_re.exec(working))
+        {
+          var is_term = term_re.test(working);
+          result += comment[0].length;
+          working.advance(comment[0].length);
+          input.debug('heredoc :' + comment[0].replace(/\n/g, "\\n"));
+          if (is_term)
+          {
+            break;
+          }
+        }
+        continue;
+      }
+
+      if (comment = pod_re.exec(working))
+      {
+        while (comment = line_re.exec(working))
+        {
+          var is_cut = pod_end_re.test(working);
+          result += comment[0].length;
+          working.advance(comment[0].length);
+          input.debug('ws :' + comment[0].replace(/\n/g, "\\n"));
+          if (is_cut)
+          {
+            break;
+          }
+        }
+      }
+      else if ( (comment = comment_re.exec(working)) || (comment = eol_re.exec(working)))
+      {
+        result += comment[0].length;
+        working.advance(comment[0].length);
+        input.debug('ws :' + comment[0].replace(/\n/g, "\\n"));
+        check_heredoc = true;
+      }
+      else
+      {
+        break;
+      }
     }
     return result;
   },
@@ -77,7 +132,7 @@ grammar = {
 		     ],
 
   "PKGWORD"        : [
-                       /[A-Za-z0-9_](?:[A-Za-z0-9_]|::)*/i,
+                       /[A-Za-z0-9_](?:[A-Za-z0-9_]|::|')*/i,
                      ],
   "WORD"           : [
 		       /[A-Za-z0-9_]+/i,
@@ -127,6 +182,7 @@ grammar = {
 
                          var delim;
                          var mean;
+                         var flags;
                          switch (tmp[i])
                          {
                            case "'":
@@ -140,20 +196,23 @@ grammar = {
                            case 'y':
                              delim = i+1;
                              mean  = tmp[i];
+                             flags = true;
                              break;
                            case 't':
                              if (tmp[i+1] == 'r')
                              {
                                delim = i+2;
                                mean  = 'tr';
+                               flags = true;
                              }
                              break;
                            case 'q':
                              switch (tmp[i+1])
                              {
+                               case 'r':
+                                 flags = true;
                                case 'q':
                                case 'w':
-                               case 'r':
                                  delim = i+2;
                                  mean  = tmp[i+0] + tmp[i+1];
                                  break;
@@ -190,38 +249,105 @@ grammar = {
                            close = inverts[n + 5];
                          }
 
-                         var stack = [close];
-                         var cont = true;
                          var result = '';
-                         while( stack.length)
-                         {
-                           i++;
-                           if ( i > tmp.length)
-                           {
-                             //throw "Unterminated string, started at: " + input.short;
-                             return false;
-                           }
 
-                           if (close != open && tmp[i] == open)
-                           {
-                             stack.unshift(close);
-                             continue;
-                           }
-                           if (tmp[i] == stack[0])
-                           {
-                             stack.shift();
-                           }
-                           if (tmp[i] == '\\')
+                         var stack_read = function()
+                         {
+                           var stack = [close];
+                           input.debug('thing', stack, tmp[i], i);
+                           while( stack.length )
                            {
                              i++;
-                           }
-                           if (stack.length > 0)
-                           {
-                             result[result.length] = tmp[i];
+                             if ( i > tmp.length)
+                             {
+                               //throw "Unterminated string, started at: " + input.short;
+                               return false;
+                             }
+
+                             if (close != open && tmp[i] == open)
+                             {
+                               stack.unshift(close);
+                               continue;
+                             }
+                             if (tmp[i] == stack[0])
+                             {
+                               stack.shift();
+                             }
+                             if (tmp[i] == '\\')
+                             {
+                               i++;
+                             }
+                             if (stack.length > 0)
+                             {
+                               result[result.length] = tmp[i];
+                             }
                            }
                          }
+
+                         stack_read()
+                         input.debug(tmp[i], i);
+
+                         if (mean == 's' || mean == 'y' || mean == 'tr')
+                         {
+                           if (open != close)
+                           {
+                             var empty_space = /\s*/.exec(tmp.substr(i+1));
+                             i += empty_space[0].length + 1;
+                             if (tmp[i] != open)
+                             {
+                               return false;
+                             }
+                           }
+                           stack_read();
+                         }
+
+                         if (flags)
+                         {
+                           flags = /^\w*/.exec(tmp.substr(i+1));
+                           flags = flags[0];
+                           i += flags.length;
+                         }
+
                          return i + 1;
-                       }
+                       },
+
+                       function heredoc_scan(input)
+                       {
+                         var tmp = input.dup().toString();
+                         var heredoc_start = /^\s*[<][<]/.exec(tmp);
+                         if (heredoc_start == null)
+                         {
+                           return false;
+                         }
+
+                         var i = heredoc_start[0].length;
+                         var delim = '';
+                         if (tmp[i] == "'" || tmp[i] == '"')
+                         {
+                           delim = tmp[i];
+                           i++;
+                         }
+                         var heredoc_term = /^(\w*)/.exec(tmp.substr(i));
+                         i += heredoc_term[0].length;
+
+                         if (delim && tmp[i] != delim)
+                         {
+                           return false;
+                         }
+                         
+                         i += delim.length;
+
+                         if ( input.lex_memory.heredoc == null )
+                         {
+                           input.lex_memory.heredoc = [];
+                         }
+                         input.lex_memory.heredoc.push({
+                           term: heredoc_term[1],
+                           delim: delim, 
+                         });
+
+                         return i;
+                       },
 		     ],
   /*
     $PMFUNC1 = {
@@ -578,9 +704,9 @@ grammar = {
   */
 
   "RELOP"          : [
-		       /[<]/i,
+		       /[<](?!<)/i,
 		       /[<][=]/i,
-		       /[>]/i,
+		       /[>](?!>)/i,
 		       /[>][=]/i,
 		       /lt/i,
 		       /gt/i,
@@ -625,7 +751,7 @@ grammar = {
 
   "ADDOP"          : [
 		       /[+]/i,
-		       /[-]/i,
+		       /[-](?!>)/i,
 		       /[.]/i,
 		     ],
   /*
@@ -769,7 +895,7 @@ grammar = {
   */
 
   "UMINUS"         : [
-		       /[-]/i,
+		       /[-](?!>)/i,
 		     ],
   /*
     $REFGEN1 = {
@@ -859,7 +985,7 @@ grammar = {
   */
 
   "DOLSHARP"       : [
-		       /DOLSHARP/i,
+		       '$#',
 		     ],
   /*
     $DO1 = {
@@ -1379,6 +1505,7 @@ grammar = {
 		       "<FORMAT> <startformsub> <formname> <formblock>",
 		       //"<SUB> <subname> <startsub> <proto>? <subattrlist>? <optsubbody>",
 		       "<SUB> <subname> <startsub> <remember> <subsignature>? <subattrlist>? { <stmtseq> }",
+                       "<SUB> <subname> <startsub> <remember> <proto>? <subattrlist>? { <stmtseq> }",
 		       "<PACKAGE> <PKGWORD> <WORD>? ;",
 		       "<USE> <startsub> <PKGWORD> <WORD>? <listexpr>? ;",
 		       "<IF> ( <remember> <mexpr> ) <mblock> <else>",
@@ -2216,6 +2343,10 @@ grammar = {
 		       "<scalar> {prec PREC_LOW}",
 		       "<block>",
 		       "<PRIVATEREF>",
+                       /^\^[_\w]/,
+                       /^{\^[_\w+]}/,
+                       /^{\w+}/,
+                       /^[!-~]/,
 		     ],
   /*
     $listop1 = {
@@ -2405,8 +2536,7 @@ grammar = {
   */
 
   "proto"          : [
-		       "",
-		       "<THING>",
+		       /[(][$@%&;+]*[)]/
 		     ],
   /*
     $optsubbody1 = {
@@ -2916,7 +3046,7 @@ grammar = {
   */
 
   "termunop"       : [
-		       "- <term> {prec UMINUS}",
+		       "<UMINUS> <term> {prec UMINUS}",
 		       "+ <term> {prec UMINUS}",
 		       "! <term>",
 		       "~ <term>",
@@ -2982,7 +3112,7 @@ grammar = {
 		       "[ ]",
 		       "{ <expr> } {prec (}",
 		       "{ } {prec (}",
-		       "<ANONSUB> <startanonsub> <proto> <subattrlist> <block> {prec (}",
+		       "<ANONSUB> <startanonsub> <subattrlist> <block> {prec (}",
 		       "<ANONSUB> <startanonsub> <remember> <subsignature> <subattrlist> { <stmtseq> } {prec (}",
 		     ],
   /*
@@ -3381,11 +3511,6 @@ grammar = {
 		       "<term> ? <term> : <term>",
 		     ],
   "term"           : [
-                       /*
-                       "<termitem>+",
-		     ],
-  "termitem"       : [
-                       */
                        "<termbinop>",
 		       "<termunop>",
 		       "<anonymous>",
@@ -3398,11 +3523,11 @@ grammar = {
 		       "<QWLIST>",
 		       "( )",
 		       "<subscripted>",
+		       "<arylen> {prec (}",
 		       "<scalar> {prec (}",
 		       "<star> {prec (}",
 		       "<hsh> {prec (}",
 		       "<ary> {prec (}",
-		       "<arylen> {prec (}",
 		       "<sliceme> [ <expr> ]",
 		       "<kvslice> [ <expr> ]",
 		       "<sliceme> { <expr> ; }",
