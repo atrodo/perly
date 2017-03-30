@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 var grammar = require('./gmr.js');
 
 var parser_gen = require('./lib/parser');
