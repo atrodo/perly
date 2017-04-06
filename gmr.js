@@ -1,4 +1,34 @@
+var GNode = {};
+var mk_gen = function(props)
+{
+  var result = props || {};
+  Object.setPrototypeOf(result, GNode);
+  return result;
+}
+
+var GNodes = {
+  empty: mk_gen({ js: function() { return '' } }),
+  single: mk_gen({ js: function($1) { if (arguments.length != 1) throw "Too man arguments"; return $1 } }),
+  grammer: mk_gen(),
+  term: Object.create(GNode),
+};
+
+var builtins = require('./builtin');
+
 grammar = {
+  $set_SNode: function(v)
+  {
+    //SNode = v;
+    //SNode.prototype = Object.create(v);
+    Object.setPrototypeOf(SNode, v);
+    console.log(SNode, v, SNode.prototype);
+    console.log(SNode, SNode instanceof v, v.isPrototypeOf(SNode));
+    console.log(SNode, new SNode(), (new SNode()) instanceof v);
+  },
+  $get_GNode: function()
+  {
+    return GNode;
+  },
   $ws_trim: function(input)
   {
     var eol_re     = /^\s*[\n\r\u2028\u2029]/;
@@ -78,6 +108,7 @@ grammar = {
   */
 
   "GRAMPROG"       : [
+                       GNodes.empty,
 		       /^/i,
 		     ],
   /*
@@ -173,143 +204,176 @@ grammar = {
                        /0x[0-9A-Fa-f](_?[0-9A-Fa-f])*(?:\.\d*)?p[+-]?[0-9]+/i,
                        /inf/i,
                        /nan/i,
-                       function str_scan(input)
-                       {
-                         var tmp = input.dup();
-                         var spaces = /^\s*/.exec(tmp);
-                         var i = spaces[0].length;
-                         tmp = tmp.toString();
-
-                         var delim;
-                         var mean;
-                         var flags;
-                         switch (tmp[i])
+                       [
+                         function str_scan(input)
                          {
-                           case "'":
-                           case '"':
-                           case '/':
-                             delim = i;
-                             mean  = tmp[i];
-                             break;
-                           case 'm':
-                           case 's':
-                           case 'y':
-                             delim = i+1;
-                             mean  = tmp[i];
-                             flags = true;
-                             break;
-                           case 't':
-                             if (tmp[i+1] == 'r')
-                             {
-                               delim = i+2;
-                               mean  = 'tr';
-                               flags = true;
-                             }
-                             break;
-                           case 'q':
-                             switch (tmp[i+1])
-                             {
-                               case 'r':
-                                 flags = true;
-                               case 'q':
-                               case 'w':
-                                 delim = i+2;
-                                 mean  = tmp[i+0] + tmp[i+1];
-                                 break;
-                               default:
-                                 delim = i+1;
-                                 mean  = "q";
-                             }
-                             break;
-                         };
+                           var tmp = input.dup();
+                           var spaces = /^\s*/.exec(tmp);
+                           var i = spaces[0].length;
+                           tmp = tmp.toString();
 
-                         if (delim == null)
-                         {
-                           return false;
-                         }
-                         while (/\s/.test(tmp[delim]))
-                         {
-                           delim++;
-                         }
-
-                         var i = delim;
-                         var open = tmp[delim];
-                         var close = open;
-
-                         if (/\w/.test(open))
-                         {
-                           return false;
-                         }
-
-
-                         var inverts = "([{< )]}> )]}>";
-                         var n = inverts.indexOf(open);
-                         if (n != -1)
-                         {
-                           close = inverts[n + 5];
-                         }
-
-                         var result = '';
-
-                         var stack_read = function()
-                         {
-                           var stack = [close];
-                           input.debug('thing', stack, tmp[i], i);
-                           while( stack.length )
+                           var delim;
+                           var mean;
+                           var flags;
+                           switch (tmp[i])
                            {
-                             i++;
-                             if ( i > tmp.length)
-                             {
-                               //throw "Unterminated string, started at: " + input.short;
-                               return false;
-                             }
+                             case "'":
+                             case '"':
+                             case '/':
+                               delim = i;
+                               mean  = tmp[i];
+                               break;
+                             case 'm':
+                             case 's':
+                             case 'y':
+                               delim = i+1;
+                               mean  = tmp[i];
+                               flags = true;
+                               break;
+                             case 't':
+                               if (tmp[i+1] == 'r')
+                               {
+                                 delim = i+2;
+                                 mean  = 'tr';
+                                 flags = true;
+                               }
+                               break;
+                             case 'q':
+                               switch (tmp[i+1])
+                               {
+                                 case 'r':
+                                   flags = true;
+                                 case 'q':
+                                 case 'w':
+                                   delim = i+2;
+                                   mean  = tmp[i+0] + tmp[i+1];
+                                   break;
+                                 default:
+                                   delim = i+1;
+                                   mean  = "q";
+                               }
+                               break;
+                           };
 
-                             if (close != open && tmp[i] == open)
-                             {
-                               stack.unshift(close);
-                               continue;
-                             }
-                             if (tmp[i] == stack[0])
-                             {
-                               stack.shift();
-                             }
-                             if (tmp[i] == '\\')
+                           mean = mean == 'qq' ? '"'
+                                : mean == 'q'  ? "'"
+                                :                mean;
+
+                           if (delim == null)
+                           {
+                             return false;
+                           }
+                           while (/\s/.test(tmp[delim]))
+                           {
+                             delim++;
+                           }
+
+                           var i = delim;
+                           var open = tmp[delim];
+                           var close = open;
+
+                           if (/\w/.test(open))
+                           {
+                             return false;
+                           }
+
+
+                           var inverts = "([{< )]}> )]}>";
+                           var n = inverts.indexOf(open);
+                           if (n != -1)
+                           {
+                             close = inverts[n + 5];
+                           }
+
+                           var result = '';
+                           var lhs, rhs;
+
+                           var stack_read = function()
+                           {
+                             var stack = [close];
+                             input.debug('thing', stack, tmp[i], i);
+                             while( stack.length )
                              {
                                i++;
-                             }
-                             if (stack.length > 0)
-                             {
-                               result[result.length] = tmp[i];
+                               if ( i > tmp.length)
+                               {
+                                 //throw "Unterminated string, started at: " + input.short;
+                                 return false;
+                               }
+
+                               if (close != open && tmp[i] == open)
+                               {
+                                 stack.unshift(close);
+                                 continue;
+                               }
+                               if (tmp[i] == stack[0])
+                               {
+                                 stack.shift();
+                               }
+                               if (tmp[i] == '\\')
+                               {
+                                 i++;
+                               }
+                               if (stack.length > 0)
+                               {
+                                 result[result.length] = tmp[i];
+                               }
                              }
                            }
-                         }
 
-                         stack_read()
-                         input.debug(tmp[i], i);
+                           stack_read()
+                           lhs = tmp.slice(delim+1, i);
+                           //input.debug(tmp[i], i);
+                           delim = i;
 
-                         if (mean == 's' || mean == 'y' || mean == 'tr')
-                         {
-                           if (open != close)
+                           if (mean == 's' || mean == 'y' || mean == 'tr')
                            {
-                             var empty_space = /\s*/.exec(tmp.substr(i+1));
-                             i += empty_space[0].length + 1;
-                             if (tmp[i] != open)
+                             if (open != close)
                              {
-                               return false;
+                               var empty_space = /\s*/.exec(tmp.substr(i+1));
+                               i += empty_space[0].length + 1;
+                               if (tmp[i] != open)
+                               {
+                                 return false;
+                               }
                              }
+                             stack_read();
+                             rhs = tmp.slice(delim+1, i);
                            }
-                           stack_read();
-                         }
 
-                         if (flags)
-                         {
-                           flags = /^\w*/.exec(tmp.substr(i+1));
-                           flags = flags[0];
-                           i += flags.length;
-                         }
+                           if (flags)
+                           {
+                             flags = /^\w*/.exec(tmp.substr(i+1));
+                             flags = flags[0];
+                             i += flags.length;
+                           }
 
-                         return i + 1;
-                       },
+                           return {
+                             len: i + 1,
+                             matched: {
+                               lhs: lhs,
+                               rhs: rhs,
+                               mean: mean,
+                               flags: flags,
+                             },
+                           };
+                         },
+                         mk_gen({
+                           js: function($1)
+                           {
+                             console.log(arguments);
+                             switch ($1.mean)
+                             {
+                               case "'":
+                                 return "'" + $1.lhs + "'";
+                                 break;
+                               default:
+                                 throw "Bad meaning: " + $1.mean;
+                             }
+                             throw "";
+                           },
+                         }),
+                       ],
 
                        function heredoc_scan(input)
                        {
@@ -671,10 +735,17 @@ grammar = {
 		       "<PKGWORD>",
 		     ],
   "FUNCTERM"       : [
-                       "<PKGWORD>",
-		       "<PKGWORD> ( )",
 		       "<PKGWORD> <expr>",
 		       "<PKGWORD> ( <expr> )",
+		       "<PKGWORD> ( )",
+                       "<PKGWORD>",
+                       mk_gen({
+                         js: function(pkgword, expr)
+                         {
+                           console.log(arguments);
+                           throw "";
+                         },
+                       }),
 		     ],
   /*
     $UNIOP1 = {
@@ -1129,7 +1200,8 @@ grammar = {
   */
 
   "grammar"        : [
-		       "<GRAMPROG> <remember> <stmtseq>",
+                       GNodes.grammer,
+		       "<GRAMPROG> <stmtseq>",
 		       "<GRAMEXPR> <optexpr>",
 		       "<GRAMBLOCK> <block>",
 		       "<GRAMBARESTMT> <barestmt>",
@@ -1274,7 +1346,7 @@ grammar = {
   */
 
   "stmtseq"        : [
-		       "<fullstmt>* <sideff>?",
+		       "<fullstmt>*",
 		     ],
   /*
     $fullstmt1 = {
@@ -2079,17 +2151,10 @@ grammar = {
   */
 
   "listexpr"       : [
-                       /*
-		       "<listexpritem>+",
-		     ],
-  "listexpritem"   : [
-                       */
-		       "<listexpr> ,",
-		       "<listexpr> , <term>",
-		       "<listexpr> , <term>",
-                       "<WORD> => <listexpr>",
+		       "<listexpr> , <term>?",
                        "<listexpr> => <term>",
-		       "<term> {prec PREC_LOW}",
+                       "<WORD> => <listexpr>",
+		       [ "<term> {prec PREC_LOW}", GNodes.single ],
 		     ],
   /*
     $nexpr1 = {
