@@ -8,23 +8,30 @@ var mk_gen = function(props)
 
 var GNodes = {
   empty: mk_gen({ js: function() { return '' } }),
-  single: mk_gen({ js: function($1) { if (arguments.length != 1) throw "Too man arguments"; return $1 } }),
-  grammer: mk_gen(),
-  term: Object.create(GNode),
+  single: mk_gen({
+    js: function(args, snode)
+    {
+      var argnum;
+      for (var i = 0; i < snode.length; i++)
+      {
+        if (snode[i].is_snode == true)
+        {
+          if (argnum != null)
+          {
+            throw "Too man arguments";
+          }
+          argnum = i;
+        }
+      }
+      return args[argnum];
+    }
+  }),
 };
 
 var builtins = require('./builtin');
+var lexpad = builtins;
 
-grammar = {
-  $set_SNode: function(v)
-  {
-    //SNode = v;
-    //SNode.prototype = Object.create(v);
-    Object.setPrototypeOf(SNode, v);
-    console.log(SNode, v, SNode.prototype);
-    console.log(SNode, SNode instanceof v, v.isPrototypeOf(SNode));
-    console.log(SNode, new SNode(), (new SNode()) instanceof v);
-  },
+var grammar = {
   $get_GNode: function()
   {
     return GNode;
@@ -359,9 +366,9 @@ grammar = {
                            };
                          },
                          mk_gen({
-                           js: function($1)
+                           js: function(args)
                            {
-                             console.log(arguments);
+                             var $1 = args[0];
                              switch ($1.mean)
                              {
                                case "'":
@@ -370,7 +377,7 @@ grammar = {
                                default:
                                  throw "Bad meaning: " + $1.mean;
                              }
-                             throw "";
+                             throw $1;
                            },
                          }),
                        ],
@@ -740,10 +747,14 @@ grammar = {
 		       "<PKGWORD> ( )",
                        "<PKGWORD>",
                        mk_gen({
-                         js: function(pkgword, expr)
+                         js: function(args, snode)
                          {
-                           console.log(arguments);
-                           throw "";
+                           var funcname = lexpad[args[0]];
+                           if (funcname == null)
+                           {
+                             throw "Unknown function name: " + funcname;
+                           }
+                           return funcname + (args[1] || '()');
                          },
                        }),
 		     ],
@@ -1200,7 +1211,6 @@ grammar = {
   */
 
   "grammar"        : [
-                       GNodes.grammer,
 		       "<GRAMPROG> <stmtseq>",
 		       "<GRAMEXPR> <optexpr>",
 		       "<GRAMBLOCK> <block>",
@@ -1346,7 +1356,23 @@ grammar = {
   */
 
   "stmtseq"        : [
-		       "<fullstmt>*",
+                       [
+                         mk_gen({
+                           js: function(args, snode)
+                           {
+                             var result = [];
+                             for (var i = 0; i < snode.length; i++)
+                             {
+                               if (snode[i].is_snode == true)
+                               {
+                                 result.push(args[i]);
+                               }
+                             }
+                             return result.join(';\n');
+                           }
+                         }),
+                         "<fullstmt>*",
+                       ]
 		     ],
   /*
     $fullstmt1 = {
@@ -1595,7 +1621,7 @@ grammar = {
 		       "<FOR> ( <remember> <mexpr> ) <mblock> <cont>",
 		       "<block> <cont>",
 		       "<PACKAGE> <PKGWORD> <WORD>? { <remember> <stmtseq> }",
-		       "<sideff> ;",
+		       [ "<sideff> ;", GNodes.single ],
 		       ";",
 		     ],
   /*
@@ -2151,10 +2177,32 @@ grammar = {
   */
 
   "listexpr"       : [
+                       "<WORD> => <listexpr>",
 		       "<listexpr> , <term>?",
                        "<listexpr> => <term>",
-                       "<WORD> => <listexpr>",
-		       [ "<term> {prec PREC_LOW}", GNodes.single ],
+		       "<term> {prec PREC_LOW}",
+                       mk_gen({
+                         js: function(args, snode)
+                         {
+                           var result = [];
+                           for (var i = 0; i < snode.length; i++)
+                           {
+                             if (snode[i].is_snode == false)
+                             {
+                               continue;
+                             }
+
+                             if (snode[i].sym == 'WORD')
+                             {
+                               result.push("'" + args[i] + "'");
+                               continue;
+                             }
+
+                             result.push(args[i]);
+                           }
+                           return '(' + result.join(', ') + ')';
+                         }
+                       }),
 		     ],
   /*
     $nexpr1 = {
