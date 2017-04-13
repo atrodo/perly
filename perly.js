@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-var grammar = require('./gmr.js');
 
 var parser_gen = require('./lib/parser');
+var grammar = require('./gmr.js');
 var parser = parser_gen('grammar', grammar);
 
 if (require.main === module)
@@ -15,5 +15,5 @@ if (require.main === module)
 
   var path = require('path').normalize(args[1]);
   var source = require('fs').readFileSync(path, "utf8");
-  console.log(parser.parse(source));
+  console.log(parser.eval(source));
 }
