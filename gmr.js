@@ -1,4 +1,14 @@
+var _ = require('lodash');
+var util = require('util');
+
 var GNode = {};
+var mk_js = function(f)
+{
+  return mk_gen({
+    js: f,
+  });
+}
+
 var mk_gen = function(props)
 {
   var result = props || {};
@@ -26,10 +36,19 @@ var GNodes = {
       return args[argnum];
     }
   }),
+  asis: mk_gen({
+    js: function(args)
+    {
+      return _.toArray(args).join('');
+    }
+  }),
 };
 
+/*
 var builtins = require('./builtin');
-var lexpad = builtins;
+var lexpad = {};
+Object.setPrototypeOf(lexpad, builtins);
+*/
 
 var grammar = {
   $get_GNode: function()
@@ -104,6 +123,10 @@ var grammar = {
         break;
       }
     }
+
+    var ws = /^\s*/.exec(working);
+    result += ws[0].length;
+
     return result;
   },
 
@@ -749,6 +772,8 @@ var grammar = {
                        mk_gen({
                          js: function(args, snode)
                          {
+                           var mem = args.genmem;
+                           var lexpad = mem.lexpad;
                            var funcname = lexpad[args[0]];
                            if (funcname == null)
                            {
@@ -1117,6 +1142,15 @@ var grammar = {
   */
 
   "MY"             : [
+		       [
+                         /MY/i,
+                         mk_gen({
+                           js: function(args, snode)
+                           {
+                             return 'my';
+                           }
+                         }),
+                       ],
 		       /(?:MY|OUR|STATE)/i,
 		     ],
   /*
@@ -1211,6 +1245,23 @@ var grammar = {
   */
 
   "grammar"        : [
+                       mk_gen({
+                         js: function(args)
+                         {
+                           var mem = args.genmem
+                           var builtins = require('./builtin');
+                           var lexpad = {};
+                           var lexpadi = 1
+
+                           Object.setPrototypeOf(lexpad, builtins);
+                           mem.lexpad  = lexpad;
+                           mem.clexpad = 'LEXPAD'+lexpadi++;
+                           mem.lexpadi = lexpadi;
+
+                           var result = 'var ' + mem.clexpad + ' = {};\n';
+                           return result + _.toArray(args).join('');
+                         }
+                       }),
 		       "<GRAMPROG> <stmtseq>",
 		       "<GRAMEXPR> <optexpr>",
 		       "<GRAMBLOCK> <block>",
@@ -1886,6 +1937,23 @@ var grammar = {
 
   "scalar"         : [
 		       "$ <indirob>",
+                       mk_gen({
+                         js: function(args, snode)
+                         {
+                           var mem = args.genmem;
+                           var lexpad = mem.lexpad;
+                           var vname = args[1];
+                           if (mem.in_declare)
+                           {
+                             return vname;
+                           }
+                           if (lexpad[vname] == null)
+                           {
+                             throw "Variable " + vname + " was never declared";
+                           }
+                           return lexpad[vname];
+                         }
+                       }),
 		     ],
   /*
     $ary1 = {
@@ -2892,6 +2960,36 @@ var grammar = {
 
   "myattrterm"     : [
 		       "<MY> <myterm> <myattrlist>?",
+                       mk_js(function(args, snode)
+                       {
+                         var mem = args.genmem;
+                         var lexpad = mem.lexpad;
+
+                         mem.in_declare = true;
+                         var items = args[1];
+                         delete mem.in_declare;
+
+                         if (args[0] == 'my')
+                         {
+                           var result = [];
+                           for (var i=0; i<items.length; i++)
+                           {
+                             var vname = items[i];
+                             if (lexpad.hasOwnProperty(vname))
+                             {
+                               throw "Variable " + vanme + " masks same variable earlier in scope";
+                             }
+                             lexpad[vname] = [ mem.clexpad, vname ].join('.');
+                             result[i] = lexpad[vname];
+                           }
+
+                           if (result.length == 1)
+                           {
+                             return result[0];
+                           }
+                           return result;
+                         }
+                       }),
 		     ],
   /*
     $myterm1 = {
@@ -3071,6 +3169,13 @@ var grammar = {
   */
 
   "termbinop"      : [
+                       mk_js(function(args)
+                       {
+                         console.log(args[0]);
+                         console.log(args[1]);
+                         console.log(args[2]);
+                         return { op: args[1], rhs: args[2] };
+                       }),
                        "<term> <MATCHOP> <term>",
 		       "<term> <ASSIGNOP> <term>",
 		       "<term> <POWOP> <term>",
@@ -3624,6 +3729,28 @@ var grammar = {
 		       "<term> ? <term> : <term>",
 		     ],
   "term"           : [
+                       mk_js(function(args, snode)
+                       {
+                         var result = [];
+                         for (var i = 0; i < snode.length; i++)
+                         {
+                           var item = args[i];
+                           if (_.isObject(item))
+                           {
+                             result.push([ item.op, item.rhs].join(' '));
+                           }
+                           else if (_.isArray(item))
+                           {
+                             throw "cannot handle array result terms";
+                           }
+                           else
+                           {
+                             result.push(item);
+                           }
+                         }
+
+                         return result.join(' ');
+                       }),
                        "<termbinop>",
 		       "<termunop>",
 		       "<anonymous>",
