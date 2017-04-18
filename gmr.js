@@ -1287,6 +1287,7 @@ var grammar = {
 
   "remember"       : [
 		       "",
+                       GNodes.empty,
 		     ],
   /*
     $mremember1 = {
@@ -1693,6 +1694,27 @@ var grammar = {
 
   "block"          : [
 		       "{ <remember> <stmtseq> }",
+                       mk_js(function(args)
+                       {
+                         var mem = args.genmem;
+                         var lexpad = {};
+                         var lexpadi = mem.lexpadi;
+                         var clexpad = mem.clexpad;
+
+                         Object.setPrototypeOf(lexpad, mem.lexpad);
+                         mem.lexpad = lexpad;
+                         mem.clexpad = 'LEXPAD' + mem.lexpadi++;
+
+                         var result= [
+                           '(function(){',
+                           'var ' + mem.clexpad + ' = {};',
+                           args[2],
+                           '})()',
+                         ].join('\n');
+
+                         mem.clexpad = clexpad;
+                         return result;
+                       }),
 		     ],
   /*
     $mblock1 = {
@@ -2770,7 +2792,7 @@ var grammar = {
   */
 
   "cont"           : [
-		       "",
+		       [ "", GNodes.empty ],
 		       "<CONTINUE> <block>",
 		     ],
   /*
@@ -2977,7 +2999,7 @@ var grammar = {
                              var vname = items[i];
                              if (lexpad.hasOwnProperty(vname))
                              {
-                               throw "Variable " + vanme + " masks same variable earlier in scope";
+                               throw "Variable " + vname + " masks same variable earlier in scope";
                              }
                              lexpad[vname] = [ mem.clexpad, vname ].join('.');
                              result[i] = lexpad[vname];
