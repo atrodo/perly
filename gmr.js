@@ -16,6 +16,53 @@ var mk_gen = function(props)
   return result;
 }
 
+var mk_snode = function(syms, symbol, gen, len_override)
+{
+  return {
+    syms: syms.reverse(),
+    symbol: symbol,
+    gen: gen,
+    len: len_override,
+  }
+}
+
+var esc_lookup = [];
+(function()
+{
+  for (var i = 0; i < 32; i++)
+  {
+    esc_lookup[i] = '\\u' + (i < 16 ? '000' : '00') + i.toString(16);
+  }
+
+  var simple = {
+    '\0': '0', '\n': 'n', '\r': 'r',
+    '\v': 'v', '\t': 't', '\b': 'b',
+    '\f': 'f',
+    '\'': '\'', '\"': '\"', '\\': '\\',
+  }
+
+  _.each(simple,
+    function(esc, k)
+    {
+      var o = k.codePointAt(0);
+      esc_lookup[o] = '\\' + esc;
+    }
+  );
+})();
+
+var esc_str = function(str)
+{
+  var result = [];
+  for (var i = 0; i < str.length; i++)
+  {
+    var o = str.codePointAt(i);
+    var esc = esc_lookup[o];
+    result.push( esc != undefined ? esc : str[i]);
+  }
+  console.log('esc_str', str, result.join(''));
+  return result.join('');
+}
+
 var GNodes = {
   empty: mk_gen({ js: function() { return '' } }),
   single: mk_gen({
@@ -42,6 +89,40 @@ var GNodes = {
       return _.toArray(args).join('');
     }
   }),
+  str: mk_gen({
+    js: function(args)
+    {
+       return "'" + esc_str(args[0]) + "'";
+     },
+  }),
+  scalar: mk_gen({
+    js: function(args, snode)
+    {
+      var mem = args.genmem;
+      var lexpad = mem.lexpad;
+      var vname = args[1];
+      if (mem.in_declare)
+      {
+        return vname;
+      }
+      if (lexpad[vname] == null)
+      {
+        throw "Variable " + vname + " was never declared";
+      }
+      return lexpad[vname];
+    }
+  }),
+  concat: mk_gen({
+    js: function(args, snode)
+    {
+      var elements = [];
+      for (var i = 0; i < args.length; i++)
+      {
+        elements[i] = args[i];
+      }
+      return elements.join(' + ');
+    }
+  }),
 };
 
 /*
@@ -49,6 +130,56 @@ var builtins = require('./builtin');
 var lexpad = {};
 Object.setPrototypeOf(lexpad, builtins);
 */
+
+var gen_interpolate = function(str, flags, len)
+{
+  var result = [];
+  var current = '';
+  for (var i = 0; i < str.length; i++)
+  {
+    switch (str[i])
+    {
+      case '$':
+        var vname = '';
+        i++;
+        for (; i < str.length; i++)
+        {
+          if (!str[i].match(/\w/))
+          {
+            break;
+          }
+          vname += str[i];
+        }
+        i--;
+
+        if (vname.length == 0)
+        {
+          current += str[i];
+          break;
+        }
+
+        result.push(mk_snode([current], '', GNodes.str));
+        result.push(mk_snode(['$', vname], '', GNodes.scalar));
+
+        current = '';
+
+        break
+      default:
+        current += str[i];
+        break;
+    }
+  }
+
+  if (result.length == 0)
+  {
+    return mk_snode([current], '', GNodes.str, len);
+  }
+
+  result.push(mk_snode([current], '', GNodes.str));
+  result = mk_snode(result, '"', GNodes.concat, len);
+  //console.log(util.inspect(result, false, null));
+  return result;
+}
 
 var grammar = {
   $get_GNode: function()
@@ -346,7 +477,7 @@ var grammar = {
                                }
                                if (stack.length > 0)
                                {
-                                 result[result.length] = tmp[i];
+                                 result = result + tmp[i];
                                }
                              }
                            }
@@ -378,16 +509,25 @@ var grammar = {
                              i += flags.length;
                            }
 
-                           return {
-                             len: i + 1,
-                             matched: {
-                               lhs: lhs,
-                               rhs: rhs,
-                               mean: mean,
-                               flags: flags,
-                             },
-                           };
+                           switch (mean)
+                           {
+                             case '"':
+                               return gen_interpolate(lhs, flags, i+1);
+                             case "'":
+                               return mk_snode([lhs], '', GNodes.str, i+1);
+                             default:
+                               return {
+                                 len: i + 1,
+                                 matched: {
+                                   lhs: lhs,
+                                   rhs: rhs,
+                                   mean: mean,
+                                   flags: flags,
+                                 },
+                               };
+                           }
                          },
+                         /*
                          mk_gen({
                            js: function(args)
                            {
@@ -403,6 +543,7 @@ var grammar = {
                              throw $1;
                            },
                          }),
+                         */
                        ],
 
                        function heredoc_scan(input)
@@ -1959,23 +2100,7 @@ var grammar = {
 
   "scalar"         : [
 		       "$ <indirob>",
-                       mk_gen({
-                         js: function(args, snode)
-                         {
-                           var mem = args.genmem;
-                           var lexpad = mem.lexpad;
-                           var vname = args[1];
-                           if (mem.in_declare)
-                           {
-                             return vname;
-                           }
-                           if (lexpad[vname] == null)
-                           {
-                             throw "Variable " + vname + " was never declared";
-                           }
-                           return lexpad[vname];
-                         }
-                       }),
+                       GNodes.scalar,
 		     ],
   /*
     $ary1 = {
