@@ -131,6 +131,55 @@ var lexpad = {};
 Object.setPrototypeOf(lexpad, builtins);
 */
 
+var interpol_escape = {
+  t: function() { return '\t' },
+  n: function() { return '\n' },
+  r: function() { return '\r' },
+  f: function() { return '\f' },
+  b: function() { return '\b' },
+  a: function() { return '\u0007' },
+  e: function() { return '\u001B' },
+
+  x: function(state)
+    {
+      var str = state[0];
+      var i   = state[1];
+
+      var point = str.substr(i+1, 2);
+      var o = i+2;
+
+      if (str[i+1] == '{')
+      {
+        for (var o = i+2; o < str.length; o++)
+        {
+          if (str[o] == '}')
+          {
+            break;
+          }
+        }
+        point = str.substr(i+2, o-1 - i+2);
+      }
+
+      var result = parseInt(point, 16);
+      if (isNaN(result))
+      {
+        result = 0;
+      }
+      result = String.fromCodePoint(result);
+
+      state[1] = o;
+      return result;
+    },
+
+  /*
+  N {name}     [3]    named Unicode character or character sequence
+  N {U+263D}   [4,8]  Unicode character (example: FIRST QUARTER MOON)
+  c [          [5]    control char      (example: chr(27))
+  o {23072}    [6,8]  octal char        (example: SMILEY)
+  0 33         [7,8]  restricted range octal char  (example: ESC)
+  */
+};
+
 var gen_interpolate = function(str, flags, len)
 {
   var result = [];
@@ -164,6 +213,16 @@ var gen_interpolate = function(str, flags, len)
         current = '';
 
         break
+      case '\\':
+        i++;
+        if (interpol_escape[ str[i] ] != undefined)
+        {
+          var state = [str, i];
+          current += interpol_escape[ str[i] ](state);
+          console.log(state);
+          i = state[1];
+          break;
+        }
       default:
         current += str[i];
         break;
