@@ -1309,9 +1309,11 @@ var grammar = {
 
                          mem.in_declare = true;
                          var items = args[1];
+
                          if (!(items instanceof Array))
                          {
-                           throw "<myterm> didn't return an array";
+                           items = [items];
+                           items.context = scalar_ctx;
                          }
                          delete mem.in_declare;
 
@@ -1329,12 +1331,7 @@ var grammar = {
                              result[i] = lexpad[vname];
                            }
 
-                           if (result.length == 1)
-                           {
-                             return result[0];
-                           }
-
-                           result.context = list_ctx;
+                           result.context = items.context;
                            return result;
                          }
                        }),
@@ -1361,10 +1358,6 @@ var grammar = {
   "termbinop"      : [
                        mk_js(function(args)
                        {
-                         console.log(args[0]);
-                         console.log(args[1]);
-                         console.log(args[2]);
-                         return { op: args[1], rhs: args[2] };
                          return { lhs: args[0], op: args[1], rhs: args[2] };
                        }),
                        "<term> <MATCHOP> <term>",
@@ -1390,8 +1383,7 @@ var grammar = {
                            }
                            else
                            {
-                             console.log(lhs, lhs.context);
-                             throw "scalar context";
+                             result.push([ lhs, args[1], rhs].join(' '));
                            }
                            return result;
                          }),
