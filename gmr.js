@@ -1,5 +1,9 @@
+"use strict";
 var _ = require('lodash');
 var util = require('util');
+
+var list_ctx = 'LIST';
+var scalar_ctx = 'SCALAR';
 
 var GNode = {};
 var mk_js = function(f)
@@ -59,7 +63,6 @@ var esc_str = function(str)
     var esc = esc_lookup[o];
     result.push( esc != undefined ? esc : str[i]);
   }
-  console.log('esc_str', str, result.join(''));
   return result.join('');
 }
 
@@ -219,7 +222,6 @@ var gen_interpolate = function(str, flags, len)
         {
           var state = [str, i];
           current += interpol_escape[ str[i] ](state);
-          console.log(state);
           i = state[1];
           break;
         }
@@ -732,7 +734,7 @@ var grammar = {
                            {
                              throw "Unknown function name: " + funcname;
                            }
-                           return funcname + (args[1] || '()');
+                           return funcname + ('(' + (args[1] || '') + ')');
                          },
                        }),
 		     ],
@@ -934,6 +936,7 @@ var grammar = {
                            mem.lexpadi = lexpadi;
 
                            var result = 'var ' + mem.clexpad + ' = {};\n';
+                           result += 'var tmp;\n';
                            return result + _.toArray(args).join('');
                          }
                        }),
@@ -991,6 +994,7 @@ var grammar = {
 		     ],
 
   "fullstmt"       : [
+                       GNodes.single,
 		       "<barestmt>",
 		       "<labfullstmt>",
 		     ],
@@ -1043,6 +1047,7 @@ var grammar = {
                          var result= [
                            '(function(){',
                            'var ' + mem.clexpad + ' = {};',
+                           'var tmp;',
                            args[2],
                            '})()',
                          ].join('\n');
@@ -1161,13 +1166,14 @@ var grammar = {
 
                              if (snode[i].sym == 'WORD')
                              {
-                               result.push("'" + args[i] + "'");
+                               result.push("'" + esc_str(args[i]) + "'");
                                continue;
                              }
 
                              result.push(args[i]);
                            }
-                           return '(' + result.join(', ') + ')';
+                           result.context = list_ctx;
+                           return result;
                          }
                        }),
 		     ],
@@ -1303,6 +1309,10 @@ var grammar = {
 
                          mem.in_declare = true;
                          var items = args[1];
+                         if (!(items instanceof Array))
+                         {
+                           throw "<myterm> didn't return an array";
+                         }
                          delete mem.in_declare;
 
                          if (args[0] == 'my')
@@ -1323,14 +1333,22 @@ var grammar = {
                            {
                              return result[0];
                            }
+
+                           result.context = list_ctx;
                            return result;
                          }
                        }),
 		     ],
 
   "myterm"         : [
-		       "( <expr> )",
-		       "( )",
+		       [
+                         "( <expr>? )",
+                         mk_js(function(args)
+                           {
+                             return args[1];
+                           }
+                         ),
+                       ],
 		       "<scalar> {prec (}",
 		       "<hsh> {prec (}",
 		       "<ary> {prec (}",
@@ -1347,9 +1365,37 @@ var grammar = {
                          console.log(args[1]);
                          console.log(args[2]);
                          return { op: args[1], rhs: args[2] };
+                         return { lhs: args[0], op: args[1], rhs: args[2] };
                        }),
                        "<term> <MATCHOP> <term>",
-		       "<term> <ASSIGNOP> <term>",
+                       [
+                         "<term> <ASSIGNOP> <term>",
+                         mk_js(function(args)
+                         {
+                           var lhs = args[0];
+                           var rhs = args[2];
+                           var mem = args.genmem;
+
+                           var result = [];
+                           if (lhs.context == list_ctx)
+                           {
+                             rhs = '[' + rhs.join(',') + ']';
+                             var tmpvar = 'tmp';
+                             var tmp = tmpvar + ' = ' + rhs + ',';
+                             for (var i = 0; i < lhs.length; i++)
+                             {
+                               tmp += lhs[i] + '=' + tmpvar + '[' + i + '],';
+                             }
+                             result.push( '(' + tmp + tmpvar + ')' );
+                           }
+                           else
+                           {
+                             console.log(lhs, lhs.context);
+                             throw "scalar context";
+                           }
+                           return result;
+                         }),
+                       ],
 		       "<term> <POWOP> <term>",
 		       "<term> <MULOP> <term>",
 		       "<term> <ADDOP> <term>",
@@ -1400,13 +1446,18 @@ var grammar = {
                          for (var i = 0; i < snode.length; i++)
                          {
                            var item = args[i];
-                           if (_.isObject(item))
+                           if (_.isArray(item))
+                           {
+                             if (item.length > 1)
+                             {
+                               console.log(item);
+                               throw "cannot handle array result terms";
+                             }
+                             result.push(item[0]);
+                           }
+                           else if (_.isObject(item))
                            {
                              result.push([ item.op, item.rhs].join(' '));
-                           }
-                           else if (_.isArray(item))
-                           {
-                             throw "cannot handle array result terms";
                            }
                            else
                            {
@@ -1422,9 +1473,15 @@ var grammar = {
 		       "<termdo>",
 		       "<ternary>",
 		       "<REFGEN> <term>",
-		       "<myattrterm> {prec UNIOP}",
+		       [ "<myattrterm> {prec UNIOP}", GNodes.single ],
 		       "<LOCAL> <term> {prec UNIOP}",
-		       "( <expr> )",
+                       [
+                         "( <expr> )",
+                         mk_js(function(args)
+                         {
+                           return args[1];
+                         }),
+                       ],
 		       "<QWLIST>",
 		       "( )",
 		       "<subscripted>",
