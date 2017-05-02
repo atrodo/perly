@@ -754,7 +754,7 @@ var grammar = {
                            var funcname = lexpad[args[0]];
                            if (funcname == null)
                            {
-                             throw "Unknown function name: " + funcname;
+                             throw "Unknown function name: " + args[0];
                            }
                            return funcname + ('(' + (args[1] || '') + ')');
                          },
