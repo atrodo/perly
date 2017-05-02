@@ -20,6 +20,16 @@ var mk_gen = function(props)
   return result;
 }
 
+var mk_argi = function(i)
+{
+  return mk_gen({
+    js: function(args)
+    {
+      return args[i];
+    }
+  });
+}
+
 var mk_snode = function(syms, symbol, gen, len_override)
 {
   return {
