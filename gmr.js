@@ -96,6 +96,11 @@ var GNodes = {
       return args[argnum];
     }
   }),
+  constant: mk_js(function(args)
+  {
+    var v = args[0];
+    return v;
+  }),
   asis: mk_gen({
     js: function(args)
     {
