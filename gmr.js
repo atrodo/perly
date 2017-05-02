@@ -956,9 +956,10 @@ var grammar = {
                            mem.lexpad  = lexpad;
                            mem.clexpad = 'LEXPAD'+lexpadi++;
                            mem.lexpadi = lexpadi;
+                           mem.tmpi    = 0;
 
                            var result = 'var ' + mem.clexpad + ' = {};\n';
-                           result += 'var tmp;\n';
+                           result += 'var tmp=[];\n';
                            return result + _.toArray(args).join('');
                          }
                        }),
@@ -1061,19 +1062,22 @@ var grammar = {
                          var lexpad = {};
                          var lexpadi = mem.lexpadi;
                          var clexpad = mem.clexpad;
+                         var tmpi    = mem.tmpi;
 
                          Object.setPrototypeOf(lexpad, mem.lexpad);
                          mem.lexpad = lexpad;
                          mem.clexpad = 'LEXPAD' + mem.lexpadi++;
+                         mem.tmpi=0;
 
                          var result= [
                            '(function(){',
                            'var ' + mem.clexpad + ' = {};',
-                           'var tmp;',
+                           'var tmp=[];',
                            args[2],
                            '})()',
                          ].join('\n');
 
+                         mem.tmpi    = tmpi;
                          mem.clexpad = clexpad;
                          return result;
                        }),
@@ -1395,7 +1399,7 @@ var grammar = {
                            if (lhs.context == list_ctx)
                            {
                              rhs = '[' + rhs.join(',') + ']';
-                             var tmpvar = 'tmp';
+                             var tmpvar = 'tmp[' + (mem.tmpi++) + ']';
                              var tmp = tmpvar + ' = ' + rhs + ',';
                              for (var i = 0; i < lhs.length; i++)
                              {
