@@ -1031,31 +1031,52 @@ var grammar = {
 		       "<PLUGSTMT>",
 		       "<FORMAT> <startformsub> <formname> <formblock>",
 		       //"<SUB> <subname> <startsub> <proto>? <subattrlist>? <optsubbody>",
-		       "<SUB> <subname> <startsub> <remember> <subsignature>? <subattrlist>? { <stmtseq> }",
-                       "<SUB> <subname> <startsub> <remember> <proto>? <subattrlist>? { <stmtseq> }",
+		       "<SUB> <subname> <startsub> <subsignature>? <subattrlist>? { <stmtseq> }",
+                       "<SUB> <subname> <startsub> <proto>? <subattrlist>? { <stmtseq> }",
 		       "<PACKAGE> <PKGWORD> <WORD>? ;",
 		       "<USE> <startsub> <PKGWORD> <WORD>? <listexpr>? ;",
-		       "<IF> ( <remember> <mexpr> ) <mblock> <else>",
-		       "<UNLESS> ( <remember> <miexpr> ) <mblock> <else>",
-		       "<GIVEN> ( <remember> <mexpr> ) <mblock>",
-		       "<WHEN> ( <remember> <mexpr> ) <mblock>",
+                       [
+                         "<IF> ( <expr> ) <mblock> <else>?",
+                         mk_js(function(args)
+                         {
+                           var result = [
+                             'if (',
+                             args[2],
+                             ')\n{',
+                             args[4],
+                             '}',
+                           ];
+
+                           if (args[5] != undefined)
+                           {
+                             result.push('\nelse\n{');
+                             result.push(args[5]);
+                             result.push('}');
+                           }
+
+                           return result.join(' ');
+                         }),
+                       ],
+		       "<UNLESS> ( <miexpr> ) <mblock> <else>?",
+		       "<GIVEN> ( <mexpr> ) <mblock>",
+		       "<WHEN> ( <mexpr> ) <mblock>",
 		       "<DEFAULT> <block>",
-		       "<WHILE> ( <remember> <texpr> ) <mintro> <mblock> <cont>",
-		       "<UNTIL> ( <remember> <iexpr> ) <mintro> <mblock> <cont>",
-		       "<FOR> ( <remember> <mnexpr> ; <texpr> ; <mintro> <mnexpr> ) <mblock>",
-		       "<FOR> <MY> <remember> <my_scalar> ( <mexpr> ) <mblock> <cont>",
-		       "<FOR> <scalar> ( <remember> <mexpr> ) <mblock> <cont>",
-		       "<FOR> <REFGEN> <MY> <remember> <my_var> ( <mexpr> ) <mblock> <cont>",
-		       "<FOR> <REFGEN> <refgen_topic> ( <remember> <mexpr> ) <mblock> <cont>",
-		       "<FOR> ( <remember> <mexpr> ) <mblock> <cont>",
+		       "<WHILE> ( <texpr> ) <mintro> <mblock> <cont>",
+		       "<UNTIL> ( <iexpr> ) <mintro> <mblock> <cont>",
+		       "<FOR> ( <mnexpr> ; <texpr> ; <mintro> <mnexpr> ) <mblock>",
+		       "<FOR> <MY> <my_scalar> ( <mexpr> ) <mblock> <cont>",
+		       "<FOR> <scalar> ( <mexpr> ) <mblock> <cont>",
+		       "<FOR> <REFGEN> <MY> <my_var> ( <mexpr> ) <mblock> <cont>",
+		       "<FOR> <REFGEN> <refgen_topic> ( <mexpr> ) <mblock> <cont>",
+		       "<FOR> ( <mexpr> ) <mblock> <cont>",
 		       "<block> <cont>",
-		       "<PACKAGE> <PKGWORD> <WORD>? { <remember> <stmtseq> }",
+		       "<PACKAGE> <PKGWORD> <WORD>? { <stmtseq> }",
 		       [ "<sideff> ;", GNodes.single ],
 		       ";",
 		     ],
 
   "block"          : [
-		       "{ <remember> <stmtseq> }",
+		       "{ <stmtseq> }",
                        mk_js(function(args)
                        {
                          var mem = args.genmem;
@@ -1084,13 +1105,13 @@ var grammar = {
 		     ],
 
   "mblock"         : [
-		       "{ <mremember> <stmtseq> }",
+		       "{ <stmtseq> }",
+                       mk_argi(1),
 		     ],
 
   "else"           : [
-		       "<ELSE> <mblock>",
-		       "<ELSIF> ( <mexpr> ) <mblock> <else>",
-		       "",
+		       [ "<ELSE> <mblock>", mk_argi(1), ],
+		       "<ELSIF> ( <mexpr> ) <mblock> <else>?",
 		     ],
 
   "expr"           : [
@@ -1446,7 +1467,7 @@ var grammar = {
 		       "{ <expr> } {prec (}",
 		       "{ } {prec (}",
 		       "<ANONSUB> <startanonsub> <subattrlist> <block> {prec (}",
-		       "<ANONSUB> <startanonsub> <remember> <subsignature> <subattrlist> { <stmtseq> } {prec (}",
+		       "<ANONSUB> <startanonsub> <subsignature> <subattrlist> { <stmtseq> } {prec (}",
 		     ],
 
   "termdo"         : [
@@ -1483,6 +1504,7 @@ var grammar = {
                            }
                          }
 
+                         console.log("term", result);
                          return result.join(' ');
                        }),
                        "<termbinop>",
@@ -1493,13 +1515,7 @@ var grammar = {
 		       "<REFGEN> <term>",
 		       [ "<myattrterm> {prec UNIOP}", GNodes.single ],
 		       "<LOCAL> <term> {prec UNIOP}",
-                       [
-                         "( <expr> )",
-                         mk_js(function(args)
-                         {
-                           return args[1];
-                         }),
-                       ],
+                       [ "( <expr> )", mk_argi(1), ],
 		       "<QWLIST>",
 		       "( )",
 		       "<subscripted>",
@@ -1512,7 +1528,8 @@ var grammar = {
 		       "<kvslice> [ <expr> ]",
 		       "<sliceme> { <expr> ; }",
 		       "<kvslice> { <expr> ; }",
-		       "<THING> {prec (}",
+		       [ "<KEYWORD> {prec (}", GNodes.single ],
+		       [ "<THING> {prec (}", GNodes.single ],
 		       "<amper> ( )",
 		       "<amper> ( <expr> )",
 		       "<amper>",
