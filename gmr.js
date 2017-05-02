@@ -606,6 +606,13 @@ var grammar = {
                        },
 		     ],
 
+  "KEYWORD"        : [
+                       GNodes.constant,
+                       'undef',
+                       'true',
+                       'false',
+                     ],
+
   "PMFUNC"         : [
 		       /PMFUNC/i,
 		     ],
