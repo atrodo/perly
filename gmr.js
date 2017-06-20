@@ -741,28 +741,50 @@ var grammar = {
   "FUNC"           : [
 		       "<PKGWORD>",
 		     ],
+  "FUNCEXPR"       : [
+		       [ "( )", mk_js(function(args) { return '' }) ],
+		       [ "( <expr> )", mk_js(function(args) { return args[1] }) ],
+		       [ "<expr>", mk_js(function(args) { return args[0] }) ],
+                     ],
   "FUNCTERM"       : [
-		       "<PKGWORD> <expr>",
-		       "<PKGWORD> ( <expr> )",
-		       "<PKGWORD> ( )",
-                       "<PKGWORD>",
-                       mk_gen({
-                         js: function(args, snode)
+                       "<PKGWORD> <FUNCEXPR>",
+                       mk_js(
+                         function(args, snode)
                          {
                            var mem = args.genmem;
                            var lexpad = mem.lexpad;
                            var funcname = lexpad[args[0]];
+                           var call = '(' + (args[1]) + ')';
                            if (funcname == null)
                            {
-                             throw "Unknown function name: " + args[0];
+                             //console.log(util.inspect(lexpad, false, null));
+                             //throw "Unknown function name: " + args[0];
+                             var nspad  = mem.nslexpad;
+                             var builtins = mem.builtins;
+                             var funcarg = nspad+'["' + args[0] + '"]';
+
+                             // Look up the func at run time in the ns lexpad,
+                             // we know it's not local since we'd see it in
+                             // expad if it was
+                             return [
+                               '(',
+                                 funcarg, '==null ?',
+                                 builtins.die,
+                                 '("Unknown function: ' + args[0] + '")',
+                                 ':', funcarg, call,
+                               ')',
+                             ].join(' ');
                            }
-                           return funcname + ('(' + (args[1] || '') + ')');
-                         },
-                       }),
+                           return funcname + call;
+                         }
+                       ),
 		     ],
 
+  "EVAL"           : [
+                       /eval/i,
+                       // /try/i,
+                     ],
   "UNIOP"          : [
-		       /UNIOP/i,
 		     ],
 
   "LSTOP"          : [
@@ -953,10 +975,13 @@ var grammar = {
                            var lexpadi = 1
 
                            Object.setPrototypeOf(lexpad, builtins);
-                           mem.lexpad  = lexpad;
-                           mem.clexpad = 'LEXPAD'+lexpadi++;
-                           mem.lexpadi = lexpadi;
-                           mem.tmpi    = 0;
+                           mem.builtins = builtins;
+                           mem.lexpad   = lexpad;
+                           mem.clexpad  = 'LEXPAD'+lexpadi++;
+                           mem.nslexpad = mem.clexpad;
+                           mem.lexpadi  = lexpadi;
+                           mem.tmpi     = 0;
+                           mem.iife     = true;
 
                            var result = 'var ' + mem.clexpad + ' = {};\n';
                            result += 'var tmp=[];\n';
@@ -1009,6 +1034,7 @@ var grammar = {
                                  result.push(args[i]);
                                }
                              }
+
                              return result.join(';\n');
                            }
                          }),
@@ -1084,6 +1110,7 @@ var grammar = {
                          var lexpadi = mem.lexpadi;
                          var clexpad = mem.clexpad;
                          var tmpi    = mem.tmpi;
+                         var iife    = mem.iife;
 
                          Object.setPrototypeOf(lexpad, mem.lexpad);
                          mem.lexpad = lexpad;
@@ -1094,11 +1121,12 @@ var grammar = {
                            '(function(){',
                            'var ' + mem.clexpad + ' = {};',
                            'var tmp=[];',
-                           args[2],
-                           '})()',
+                           args[1],
+                           '})' + ( iife ? '()' : ''),
                          ].join('\n');
 
                          mem.tmpi    = tmpi;
+                         mem.iife    = iife;
                          mem.clexpad = clexpad;
                          return result;
                        }),
@@ -1452,7 +1480,13 @@ var grammar = {
   "termunop"       : [
 		       "<UMINUS> <term> {prec UMINUS}",
 		       "+ <term> {prec UMINUS}",
-		       "! <term>",
+		       [
+                         "! <term>",
+                         mk_js(function(args)
+                         {
+                           return '!(' + args[1] + ')';
+                         })
+                       ],
 		       "~ <term>",
 		       "<term> <POSTINC>",
 		       "<term> <POSTDEC>",
@@ -1465,7 +1499,6 @@ var grammar = {
 		       "[ <expr> ]",
 		       "[ ]",
 		       "{ <expr> } {prec (}",
-		       "{ } {prec (}",
 		       "<ANONSUB> <startanonsub> <subattrlist> <block> {prec (}",
 		       "<ANONSUB> <startanonsub> <subsignature> <subattrlist> { <stmtseq> } {prec (}",
 		     ],
@@ -1496,7 +1529,7 @@ var grammar = {
                            }
                            else if (_.isObject(item))
                            {
-                             result.push([ item.op, item.rhs].join(' '));
+                             result.push([ item.lhs, item.op, item.rhs].join(' '));
                            }
                            else
                            {
@@ -1504,7 +1537,6 @@ var grammar = {
                            }
                          }
 
-                         console.log("term", result);
                          return result.join(' ');
                        }),
                        "<termbinop>",
@@ -1542,6 +1574,26 @@ var grammar = {
 		       "<LOOPEX> <term>",
 		       "<LOOPEX>",
 		       "<NOTOP> <listexpr>",
+                       [
+                         "<EVAL> <block>",
+                         mk_js(function(args, snode)
+                         {
+                           var mem = args.genmem
+                           var iife = mem.iife;
+                           var builtins = mem.builtins;
+
+                           mem.iife = false;
+
+                           var result = [
+                             builtins.eval+'(',
+                             args[1],
+                             ')',
+                           ].join('\n');
+
+                           mem.iife = iife;
+                           return result;
+                         }),
+                       ],
 		       "<UNIOP> <block>",
 		       "<UNIOP> <term>",
 		       "<UNIOP>",

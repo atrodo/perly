@@ -17,4 +17,9 @@ else
   say 'ok 2 - false works';
 }
 
+if (!false)
+{
+  say 'ok 3 - !false works';
+}
+
 say '1..3';
