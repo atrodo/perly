@@ -76,6 +76,39 @@ var esc_str = function(str)
   return result.join('');
 }
 
+var mgc_nodes = {
+  stmtseq: function(stmts)
+  {
+     var last_expr = stmts[ stmts.length - 1 ];
+
+     this.toString = function() { return stmts.join(';\n') };
+     this.implicit_return = function()
+     {
+       if ( !( last_expr instanceof mgc_nodes.result ) )
+       {
+         stmts[ stmts.length - 1 ] = new mgc_nodes.result( last_expr );
+       }
+     }
+  },
+  term: function(lhs, op, rhs)
+  {
+    this.toString = function() {
+    return [ lhs, op, rhs].join(' ') };
+  },
+  list: function(items)
+  {
+    this.toString = function() { return items.join(' ') };
+  },
+  result: function(result)
+  {
+    if (result == null)
+    {
+      result = '';
+    }
+    this.toString = function() { return 'return ' + result };
+  },
+};
+
 var GNodes = {
   empty: mk_gen({ js: function() { return '' } }),
   single: mk_gen({
@@ -558,6 +591,9 @@ var grammar = {
                                case "'":
                                  return "'" + $1.lhs + "'";
                                  break;
+                               case '"':
+                                 return gen_interpolate($1.lhs, 'js');
+                                 break;
                                default:
                                  throw "Bad meaning: " + $1.mean;
                              }
@@ -784,7 +820,37 @@ var grammar = {
                        /eval/i,
                        // /try/i,
                      ],
+  "RETURN"         : [
+                       /return/i,
+                     ],
   "UNIOP"          : [
+                       [
+                         "<EVAL> <block>",
+                         mk_js(function(args, snode)
+                         {
+                           var mem = args.genmem
+                           var iife = mem.iife;
+                           var builtins = mem.builtins;
+
+                           mem.iife = false;
+
+                           var result = [
+                             builtins.eval+'(',
+                             args[1],
+                             ')',
+                           ].join('\n');
+
+                           mem.iife = iife;
+                           return result;
+                         }),
+                       ],
+                       [
+                         "<RETURN> <term>?",
+                         mk_js(function(args, snode)
+                         {
+                           return new mgc_nodes.result(args[1]);
+                         }),
+                       ],
 		     ],
 
   "LSTOP"          : [
@@ -937,16 +1003,13 @@ var grammar = {
 		     ],
 
   "MY"             : [
-		       [
-                         /MY/i,
                          mk_gen({
                            js: function(args, snode)
                            {
-                             return 'my';
+                             return args[0].toLowerCase();
                            }
                          }),
-                       ],
-		       /(?:MY|OUR|STATE)/i,
+                         /(?:MY|OUR|STATE)/i,
 		     ],
 
   "REQUIRE"        : [
@@ -1024,8 +1087,10 @@ var grammar = {
   "stmtseq"        : [
                        [
                          mk_gen({
-                           js: function(args, snode)
+                           js: function stmtseq_js(args, snode)
                            {
+                             global.depth = (global.depth || 0)+1;
+                             var depth = global.depth;
                              var result = [];
                              for (var i = 0; i < snode.length; i++)
                              {
@@ -1034,11 +1099,10 @@ var grammar = {
                                  result.push(args[i]);
                                }
                              }
-
-                             return result.join(';\n');
+                             return new mgc_nodes.stmtseq( result );
                            }
                          }),
-                         "<fullstmt>*",
+                         "<fullstmt>* <sideff>?",
                        ]
 		     ],
 
@@ -1117,11 +1181,13 @@ var grammar = {
                          mem.clexpad = 'LEXPAD' + mem.lexpadi++;
                          mem.tmpi=0;
 
+                         var stmtseq = args[1];
+                         stmtseq.implicit_return();
                          var result= [
                            '(function(){',
                            'var ' + mem.clexpad + ' = {};',
                            'var tmp=[];',
-                           args[1],
+                           stmtseq,
                            '})' + ( iife ? '()' : ''),
                          ].join('\n');
 
@@ -1245,10 +1311,17 @@ var grammar = {
                                continue;
                              }
 
-                             result.push(args[i]);
+                             if (_.isArray(args[i]) && args[i].length == 1)
+                             {
+                               result.push(args[i][0]);
+                             }
+                             else
+                             {
+                               result.push(args[i]);
+                             }
                            }
                            result.context = list_ctx;
-                           return result;
+                           return new mgc_nodes.list(result);
                          }
                        }),
 		     ],
@@ -1433,7 +1506,7 @@ var grammar = {
   "termbinop"      : [
                        mk_js(function(args)
                        {
-                         return { lhs: args[0], op: args[1], rhs: args[2] };
+                         return new mgc_nodes.term( args[0], args[1], args[2] );
                        }),
                        "<term> <MATCHOP> <term>",
                        [
@@ -1444,22 +1517,21 @@ var grammar = {
                            var rhs = args[2];
                            var mem = args.genmem;
 
+                           if (lhs.context != list_ctx)
+                           {
+                             return new mgc_nodes.term( args[0], args[1], args[2] );
+                           }
+
                            var result = [];
-                           if (lhs.context == list_ctx)
+                           rhs = '[' + rhs.join(',') + ']';
+                           var tmpvar = 'tmp[' + (mem.tmpi++) + ']';
+                           var tmp = tmpvar + ' = ' + rhs + ',';
+                           for (var i = 0; i < lhs.length; i++)
                            {
-                             rhs = '[' + rhs.join(',') + ']';
-                             var tmpvar = 'tmp[' + (mem.tmpi++) + ']';
-                             var tmp = tmpvar + ' = ' + rhs + ',';
-                             for (var i = 0; i < lhs.length; i++)
-                             {
-                               tmp += lhs[i] + '=' + tmpvar + '[' + i + '],';
-                             }
-                             result.push( '(' + tmp + tmpvar + ')' );
+                             tmp += lhs[i] + '=' + tmpvar + '[' + i + '],';
                            }
-                           else
-                           {
-                             result.push([ lhs, args[1], rhs].join(' '));
-                           }
+                           result.push( '(' + tmp + tmpvar + ')' );
+
                            return result;
                          }),
                        ],
@@ -1496,6 +1568,7 @@ var grammar = {
 		     ],
 
   "anonymous"      : [
+                       GNodes.empty,
 		       "[ <expr> ]",
 		       "[ ]",
 		       "{ <expr> } {prec (}",
@@ -1518,6 +1591,12 @@ var grammar = {
                          for (var i = 0; i < snode.length; i++)
                          {
                            var item = args[i];
+
+                           if (!item)
+                           {
+                             continue;
+                           }
+
                            if (_.isArray(item))
                            {
                              if (item.length > 1)
@@ -1527,17 +1606,19 @@ var grammar = {
                              }
                              result.push(item[0]);
                            }
+                           /*
                            else if (_.isObject(item))
                            {
                              result.push([ item.lhs, item.op, item.rhs].join(' '));
                            }
+                           */
                            else
                            {
                              result.push(item);
                            }
                          }
 
-                         return result.join(' ');
+                         return result;//.join(' ');
                        }),
                        "<termbinop>",
 		       "<termunop>",
@@ -1574,29 +1655,7 @@ var grammar = {
 		       "<LOOPEX> <term>",
 		       "<LOOPEX>",
 		       "<NOTOP> <listexpr>",
-                       [
-                         "<EVAL> <block>",
-                         mk_js(function(args, snode)
-                         {
-                           var mem = args.genmem
-                           var iife = mem.iife;
-                           var builtins = mem.builtins;
-
-                           mem.iife = false;
-
-                           var result = [
-                             builtins.eval+'(',
-                             args[1],
-                             ')',
-                           ].join('\n');
-
-                           mem.iife = iife;
-                           return result;
-                         }),
-                       ],
-		       "<UNIOP> <block>",
-		       "<UNIOP> <term>",
-		       "<UNIOP>",
+                       "<UNIOP>",
 		       "<REQUIRE> <term>",
                        "<FUNCTERM>",
 		       "<PKGWORD>",
