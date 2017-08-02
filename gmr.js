@@ -92,8 +92,7 @@ var mgc_nodes = {
   },
   term: function(lhs, op, rhs)
   {
-    this.toString = function() {
-    return [ lhs, op, rhs].join(' ') };
+    this.toString = function() { return [ lhs, op, rhs].join(' ') };
   },
   list: function(items)
   {
@@ -150,12 +149,12 @@ var GNodes = {
     js: function(args, snode)
     {
       var mem = args.genmem;
-      var lexpad = mem.lexpad;
       var vname = args[1];
       if (mem.in_declare)
       {
         return vname;
       }
+      var lexpad = mem.lexpad;
       if (lexpad[vname] == null)
       {
         throw "Variable " + vname + " was never declared";
