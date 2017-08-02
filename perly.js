@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+'use strict';
 var parser_gen = require('./lib/parser');
 var grammar = require('./gmr.js');
 var CORE = require('./CORE.js');
@@ -7,17 +8,43 @@ var parser = parser_gen('grammar', grammar);
 
 if (require.main === module)
 {
-  var args = process.argv.slice(1);
-  if (args[1] == null)
+  var prog = process.argv[1];
+  var getopt = require('node-getopt').create([
+    ['d' , 'debug'     , 'debug'],
+    ['u' , 'dump_tree' , 'dump parse tree'],
+    ['O' , 'show_js'   , 'show the javascript, do not execute'],
+    ['h' , 'help'      , 'display this help'],
+    ['v' , 'version'   , 'show version']
+  ])
+  .bindHelp()
+
+  getopt.setHelp(
+    "Usage: " + prog + " [OPTION] [FILE]\n" +
+    "perly\n" +
+    "\n" +
+    "[[OPTIONS]]\n" +
+    "\n" +
+    ""
+  )
+
+  var opt = getopt.parseSystem();
+
+  console.info(opt);
+
+  var file = opt.argv[0];
+  if (file == null)
   {
-    console.log('Usage: '+args[0]+' FILE');
+    getopt.showHelp();
     process.exit(1);
   }
 
-  var path = require('path').normalize(args[1]);
+  var path = require('path').normalize(file);
   var source = require('fs').readFileSync(path, "utf8");
-  runtime = {
+  var runtime = {
     CORE: CORE,
+    ns: {
+      'CORE::': CORE,
+    },
   };
-  parser.eval(source, runtime);
+  parser.eval(source, runtime, opt.options);
 }
