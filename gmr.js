@@ -96,7 +96,13 @@ var mgc_nodes = {
   },
   list: function(items)
   {
-    this.toString = function() { return items.join(' ') };
+    this.toString = function() { return items.join(',') };
+    for (var i = 0; i < items.length; i++)
+    {
+      this[i] = items[i];
+    }
+    this.length = items.length;
+    this.context = list_ctx;
   },
   result: function(result)
   {
@@ -1452,12 +1458,11 @@ var grammar = {
                        mk_js(function(args, snode)
                        {
                          var mem = args.genmem;
-                         var lexpad = mem.lexpad;
 
                          mem.in_declare = true;
                          var items = args[1];
 
-                         if (!(items instanceof Array))
+                         if (!_.isArrayLike(items))
                          {
                            items = [items];
                            items.context = scalar_ctx;
@@ -1467,6 +1472,7 @@ var grammar = {
                          if (args[0] == 'my')
                          {
                            var result = [];
+                           var lexpad = mem.lexpad;
                            for (var i=0; i<items.length; i++)
                            {
                              var vname = items[i];
@@ -1477,6 +1483,11 @@ var grammar = {
                              lexpad[vname] = [ mem.clexpad, vname ].join('.');
                              result[i] = lexpad[vname];
                            }
+                           if ( items.context == list_ctx )
+                           {
+                             result = new mgc_nodes.list( result );
+                           }
+                           return result;
 
                            result.context = items.context;
                            return result;
@@ -1521,17 +1532,15 @@ var grammar = {
                              return new mgc_nodes.term( args[0], args[1], args[2] );
                            }
 
-                           var result = [];
-                           rhs = '[' + rhs.join(',') + ']';
+                           rhs = '[' + rhs + ']';
                            var tmpvar = 'tmp[' + (mem.tmpi++) + ']';
                            var tmp = tmpvar + ' = ' + rhs + ',';
                            for (var i = 0; i < lhs.length; i++)
                            {
                              tmp += lhs[i] + '=' + tmpvar + '[' + i + '],';
                            }
-                           result.push( '(' + tmp + tmpvar + ')' );
 
-                           return result;
+                           return [ '(' + tmp + tmpvar + ')' ];
                          }),
                        ],
 		       "<term> <POWOP> <term>",
