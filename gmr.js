@@ -887,7 +887,7 @@ var grammar = {
 		     ],
 
   "DOTDOT"         : [
-		       /DOTDOT/i,
+		       /[.][.]/i,
 		     ],
 
   "YADAYADA"       : [
@@ -1633,6 +1633,22 @@ var grammar = {
                            return [ '(' + tmp + tmpvar + ')' ];
                          }),
                        ],
+                       [
+                         "<term> <DOTDOT> <term>",
+                         mk_js(function(args)
+                         {
+                           var lhs = args[0] |0;
+                           var rhs = args[2] |0;
+                           var items = [];
+                           for (var i = lhs; i <= rhs; i++)
+                           {
+                             items.push(i);
+                           }
+                           var result = new mgc_nodes.list(items);
+                           console.log('asdf', result);
+                           return result;
+                         }),
+                       ],
 		       "<term> <POWOP> <term>",
 		       "<term> <MULOP> <term>",
 		       "<term> <ADDOP> <term>",
@@ -1641,7 +1657,6 @@ var grammar = {
 		       "<term> <EQOP> <term>",
 		       "<term> <BITANDOP> <term>",
 		       "<term> <BITOROP> <term>",
-		       "<term> <DOTDOT> <term>",
 		       "<term> <ANDAND> <term>",
 		       "<term> <OROR> <term>",
 		       "<term> <DORDOR> <term>",
