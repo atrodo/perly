@@ -58,4 +58,10 @@ else
   say 'nok 7 - == will cast to a number';
 }
 
-say '1..7';
+say 'ok 8 - postfix if works'
+  if 1;
+
+say 'ok 9 - postfix unless works'
+  unless 0;
+
+say '1..9';
