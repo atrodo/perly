@@ -184,6 +184,31 @@ var mgc_nodes = {
     this.length = items.length;
     this.context = list_ctx;
   },
+  cond: function(cond, block, elseblock, invert)
+  {
+    var result = [
+      'if (',
+      invert ? '!' : '!!',
+      '(',
+      cond,
+      ')',
+      ' )\n{',
+      block,
+      '}',
+    ];
+
+    if (elseblock != undefined)
+    {
+      result.push('\nelse\n{');
+      result.push(elseblock);
+      result.push('}');
+    }
+    result.push('\n');
+    this.toString = function()
+    {
+      return result.join(' ');
+    };
+  },
   result: function(result)
   {
     if (result == null)
@@ -1226,22 +1251,7 @@ var grammar = {
                          "<IF> ( <expr> ) <mblock> <else>?",
                          mk_js(function(args)
                          {
-                           var result = [
-                             'if (',
-                             args[2],
-                             ')\n{',
-                             args[4],
-                             '}',
-                           ];
-
-                           if (args[5] != undefined)
-                           {
-                             result.push('\nelse\n{');
-                             result.push(args[5]);
-                             result.push('}');
-                           }
-
-                           return result.join(' ');
+                           return new mgc_nodes.cond(args[2], args[4], args[5]);
                          }),
                        ],
 		       "<UNLESS> ( <miexpr> ) <mblock> <else>?",
@@ -1338,13 +1348,25 @@ var grammar = {
 
   "sideff"         : [
 		       "error",
-		       "<expr>",
-		       "<expr> <IF> <expr>",
-		       "<expr> <UNLESS> <expr>",
+                       [
+                         "<expr> <IF> <expr>",
+                         mk_js(function(args)
+                         {
+                           return new mgc_nodes.cond(args[2], args[0]);
+                         }),
+                       ],
+                       [
+                         "<expr> <UNLESS> <expr>",
+                         mk_js(function(args)
+                         {
+                           return new mgc_nodes.cond(args[2], args[0], null, true);
+                         }),
+                       ],
 		       "<expr> <WHILE> <expr>",
 		       "<expr> <UNTIL> <iexpr>",
 		       "<expr> <FOR> <expr>",
 		       "<expr> <WHEN> <expr>",
+		       "<expr>",
 		     ],
 
   "sliceme"        : [
