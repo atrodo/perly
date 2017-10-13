@@ -86,6 +86,60 @@ var esc_str = function(str)
   return result.join('');
 }
 
+var new_scope = function(block_fn, mem)
+{
+  var lexpad = {};
+  var lexpadi = mem.lexpadi;
+  var clexpad = mem.clexpad;
+  var tmpi    = mem.tmpi;
+  var iife    = mem.iife;
+
+  Object.setPrototypeOf(lexpad, mem.lexpad);
+
+  mem.lexpad  = lexpad;
+  mem.clexpad = 'LEXPAD' + mem.lexpadi++;
+  mem.tmpi    = 0;
+
+  var stmtseq = block_fn();
+  if ( stmtseq.implicit_return )
+  {
+    stmtseq.implicit_return();
+  }
+
+  var result= [
+    '(function(){',
+    'var ' + mem.clexpad + ' = {};',
+    'var tmp=[];',
+    stmtseq,
+    '})' + ( iife ? '()' : ''),
+  ].join('\n');
+
+  mem.tmpi    = tmpi;
+  mem.iife    = iife;
+  mem.clexpad = clexpad;
+  return result;
+
+                           var mem = args.genmem
+                           var builtins = require('./builtin');
+                           var lexpad = {};
+                           var lexpadi = 1
+
+                           Object.setPrototypeOf(lexpad, builtins);
+                           mem.builtins = builtins;
+                           mem.lexpad   = lexpad;
+                           mem.clexpad  = 'LEXPAD'+lexpadi++;
+                           //mem.nspad    = lexpad;
+                           //mem.nscpad   = mem.clexpad;
+                           mem.nslexpad = mem.clexpad;
+                           mem.lexpadi  = lexpadi;
+                           mem.tmpi     = 0;
+                           mem.iife     = true;
+
+                           var result = 'var ' + mem.clexpad + ' = {};\n';
+                           result += 'var tmp=[];\n';
+                           return result + _.toArray(args).join('');
+}
+
 var mgc_nodes = {
   stmtseq: function(stmts)
   {
@@ -1068,20 +1122,14 @@ var grammar = {
                            var mem = args.genmem
                            var builtins = require('./builtin');
                            var lexpad = {};
-                           var lexpadi = 1
 
                            Object.setPrototypeOf(lexpad, builtins);
                            mem.builtins = builtins;
-                           mem.lexpad   = lexpad;
-                           mem.clexpad  = 'LEXPAD'+lexpadi++;
-                           mem.nslexpad = mem.clexpad;
-                           mem.lexpadi  = lexpadi;
+                           mem.lexpad   = builtins;
+                           mem.lexpadi  = 1;
                            mem.tmpi     = 0;
                            mem.iife     = true;
-
-                           var result = 'var ' + mem.clexpad + ' = {};\n';
-                           result += 'var tmp=[];\n';
-                           return result + _.toArray(args).join('');
+                           return new_scope(args.getters[1], mem);
                          }
                        }),
 		       "<GRAMPROG> <stmtseq>",
@@ -1203,31 +1251,7 @@ var grammar = {
                        mk_js(function(args)
                        {
                          var mem = args.genmem;
-                         var lexpad = {};
-                         var lexpadi = mem.lexpadi;
-                         var clexpad = mem.clexpad;
-                         var tmpi    = mem.tmpi;
-                         var iife    = mem.iife;
-
-                         Object.setPrototypeOf(lexpad, mem.lexpad);
-                         mem.lexpad = lexpad;
-                         mem.clexpad = 'LEXPAD' + mem.lexpadi++;
-                         mem.tmpi=0;
-
-                         var stmtseq = args[1];
-                         stmtseq.implicit_return();
-                         var result= [
-                           '(function(){',
-                           'var ' + mem.clexpad + ' = {};',
-                           'var tmp=[];',
-                           stmtseq,
-                           '})' + ( iife ? '()' : ''),
-                         ].join('\n');
-
-                         mem.tmpi    = tmpi;
-                         mem.iife    = iife;
-                         mem.clexpad = clexpad;
-                         return result;
+                         return new_scope(args.getters[1], mem);
                        }),
 		     ],
 
