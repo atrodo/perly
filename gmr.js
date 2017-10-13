@@ -209,6 +209,35 @@ var mgc_nodes = {
       return result.join(' ');
     };
   },
+  foreach: function(scalar, expr, block, cont)
+  {
+    var expr_assign = "" + expr;
+    if ( expr.context == list_ctx )
+    {
+      expr_assign = '[' + expr + ']';
+    }
+
+    var tmpvar    = 'loop_expr';
+    var tmpi      = 'loop_i';
+    var tmpassign = tmpvar + ' = ' + expr_assign;
+
+    var result = [
+      '//\n', 'for ( var',
+        tmpassign, ',', tmpi + ' = 0;',
+        scalar, '=', tmpvar + '[' + tmpi + '],',
+        tmpi, '<' + tmpvar + '.length',
+        ';',
+        tmpi + '++',
+        ')', '\n',
+        '{\n',
+        block, '\n',
+        '}\n',
+    ];
+    this.toString = function()
+    {
+      return result.join(' ');
+    };
+  },
   result: function(result)
   {
     if (result == null)
@@ -1261,13 +1290,40 @@ var grammar = {
 		       "<WHILE> ( <texpr> ) <mintro> <mblock> <cont>",
 		       "<UNTIL> ( <iexpr> ) <mintro> <mblock> <cont>",
 		       "<FOR> ( <mnexpr> ; <texpr> ; <mintro> <mnexpr> ) <mblock>",
-		       "<FOR> <MY> <my_scalar> ( <mexpr> ) <mblock> <cont>",
-		       "<FOR> <scalar> ( <mexpr> ) <mblock> <cont>",
+                       [
+                         "<FOR> <MY>? <scalar> ( <mexpr> ) <mblock> <cont>",
+                         mk_js(function(args)
+                         {
+                           var mem = args.genmem
+                           var gen_block = function()
+                           {
+                             var scalar;
+                             if (args[1] != '')
+                             {
+                               mem.in_declare = true;
+                               scalar = define_var(args[1], args[2], mem);
+                               mem.in_declare = false;
+                             }
+                             scalar = scalar == null ? args[2] : scalar;
+
+                             return new mgc_nodes.foreach(scalar, args[4], args[6], args[7]);
+                           }
+
+                           return new_scope(gen_block, mem);
+                         }),
+                       ],
+		       //"<FOR> <scalar> ( <mexpr> ) <mblock> <cont>",
 		       "<FOR> <REFGEN> <MY> <my_var> ( <mexpr> ) <mblock> <cont>",
 		       "<FOR> <REFGEN> <refgen_topic> ( <mexpr> ) <mblock> <cont>",
 		       "<FOR> ( <mexpr> ) <mblock> <cont>",
 		       "<block> <cont>",
-		       "<PACKAGE> <PKGWORD> <WORD>? { <stmtseq> }",
+                       [
+                         "<PACKAGE> <PKGWORD> <WORD>? { <stmtseq> }",
+                         mk_js(function(args)
+                         {
+                           return '';
+                         }),
+                       ],
 		       [ "<sideff> ;", GNodes.single ],
 		       ";",
 		     ],
