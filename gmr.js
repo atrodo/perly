@@ -1552,12 +1552,24 @@ var grammar = {
                          mem.in_declare = true;
                          var items = args[1];
 
-                         if (!_.isArrayLike(items))
+                         if (_.isString(items) || !_.isArrayLike(items))
                          {
                            items = [items];
                            items.context = scalar_ctx;
                          }
                          delete mem.in_declare;
+
+                         result = [];
+                         for (var i=0; i<items.length; i++)
+                         {
+                           result[i] = define_var(args[0], items[i], mem);
+                         }
+
+                         if ( items.context == list_ctx )
+                         {
+                           result = new mgc_nodes.list( result );
+                         }
+                         return result;
 
                          if (args[0] == 'my')
                          {
