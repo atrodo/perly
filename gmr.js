@@ -140,6 +140,22 @@ var new_scope = function(block_fn, mem)
                            return result + _.toArray(args).join('');
 }
 
+var define_var = function(scope, vname, mem)
+{
+  var lexpad = mem.lexpad;
+
+  if (scope == 'my')
+  {
+    if (lexpad.hasOwnProperty(vname))
+    {
+      //console.log(util.inspect(lexpad, false, null));
+      throw "Variable " + vname + " masks same variable earlier in scope";
+    }
+    lexpad[vname] = [ mem.clexpad, vname ].join('.');
+    return lexpad[vname];
+  }
+}
+
 var mgc_nodes = {
   stmtseq: function(stmts)
   {
