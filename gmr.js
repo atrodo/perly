@@ -4,6 +4,16 @@ var util = require('util');
 
 var list_ctx = 'LIST';
 var scalar_ctx = 'SCALAR';
+var reserved_pkgwords = {
+  "if": "expr",
+  "unless": "expr",
+  "given": "expr",
+  "when": "expr",
+  "default": "expr",
+  "while": "expr",
+  "until": "expr",
+  "for": "expr",
+};
 
 var GNode = {};
 var mk_js = function(f)
@@ -401,7 +411,25 @@ var grammar = {
 		     ],
 
   "PKGWORD"        : [
-                       /[A-Za-z0-9_](?:[A-Za-z0-9_]|::|')*/i,
+                       [
+                         function pkgword_scan(input)
+                         {
+                           var tmp = input.dup();
+                           var result = /^[A-Za-z_](?:[A-Za-z0-9_]|::|')*/i.exec(tmp);
+
+                           if ( result == null )
+                           {
+                             return false;
+                           }
+                           result = result[0];
+
+                           if (result in reserved_pkgwords)
+                           {
+                             return false;
+                           }
+                           return result;
+                         },
+                       ]
                      ],
   "WORD"           : [
 		       /[A-Za-z0-9_]+/i,
