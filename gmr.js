@@ -200,6 +200,10 @@ var mgc_nodes = {
   },
   list: function(items)
   {
+    if ( items instanceof mgc_nodes.list)
+    {
+      return items;
+    }
     this.toString = function() { return items.join(',') };
     for (var i = 0; i < items.length; i++)
     {
