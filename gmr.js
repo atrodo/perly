@@ -86,19 +86,31 @@ var esc_str = function(str)
   return result.join('');
 }
 
-var new_scope = function(block_fn, mem)
+var new_scope = function(block_fn, mem, opts)
 {
   var lexpad = {};
   var lexpadi = mem.lexpadi;
   var clexpad = mem.clexpad;
   var tmpi    = mem.tmpi;
-  var iife    = mem.iife;
+
+  if ( opts == null )
+  {
+    opts = {};
+  }
 
   Object.setPrototypeOf(lexpad, mem.lexpad);
 
   mem.lexpad  = lexpad;
   mem.clexpad = 'LEXPAD' + mem.lexpadi++;
   mem.tmpi    = 0;
+
+  var topic_define = '';
+  if ( opts.need_topic )
+  {
+    lexpad['_'] = 'topic';
+    topic_define = 'var topic;';
+  }
+  lexpad['a'] = '1';
 
   var stmtseq = block_fn();
   if ( stmtseq.implicit_return )
@@ -107,15 +119,20 @@ var new_scope = function(block_fn, mem)
   }
 
   var result= [
-    '(function(){',
+    'function(){',
     'var ' + mem.clexpad + ' = {};',
     'var tmp=[];',
+    topic_define,
     stmtseq,
-    '})' + ( iife ? '()' : ''),
+    '}'
   ].join('\n');
 
+  if (opts.iife)
+  {
+    result = '(' + result + ')()';
+  }
+
   mem.tmpi    = tmpi;
-  mem.iife    = iife;
   mem.clexpad = clexpad;
   return result;
 
@@ -169,6 +186,13 @@ var mgc_nodes = {
          stmts[ stmts.length - 1 ] = new mgc_nodes.result( last_expr );
        }
      }
+  },
+  block: function(block_fn, mem)
+  {
+    var opts = { iife: true };
+
+    this.no_iife = function() { opts.iife = false };
+    this.toString = function() { return new_scope(block_fn, mem, opts); };
   },
   term: function(lhs, op, rhs)
   {
@@ -986,18 +1010,18 @@ var grammar = {
                          mk_js(function(args, snode)
                          {
                            var mem = args.genmem
-                           var iife = mem.iife;
                            var builtins = mem.builtins;
+                           var block = args[1];
 
-                           mem.iife = false;
+                           block.no_iife();
+
 
                            var result = [
                              builtins.eval+'(',
-                             args[1],
+                             block,
                              ')',
                            ].join('\n');
 
-                           mem.iife = iife;
                            return result;
                          }),
                        ],
@@ -1198,8 +1222,8 @@ var grammar = {
                            mem.lexpad   = builtins;
                            mem.lexpadi  = 1;
                            mem.tmpi     = 0;
-                           mem.iife     = true;
-                           return new_scope(args.getters[1], mem);
+
+                           return new_scope(args.getters[1], mem, { iife: true });
                          }
                        }),
 		       "<GRAMPROG> <stmtseq>",
@@ -1332,8 +1356,8 @@ var grammar = {
 		       "{ <stmtseq> }",
                        mk_js(function(args)
                        {
-                         var mem = args.genmem;
-                         return new_scope(args.getters[1], mem);
+                         var mem = args.genmem
+                         return new mgc_nodes.block(args.getters[1], mem);
                        }),
 		     ],
 
