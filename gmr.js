@@ -1319,6 +1319,7 @@ var grammar = {
 		       "<UNTIL> ( <iexpr> ) <mintro> <mblock> <cont>",
 		       "<FOR> ( <mnexpr> ; <texpr> ; <mintro> <mnexpr> ) <mblock>",
                        [
+                         "<FOR> <->   <->      ( <mexpr> ) <mblock> <cont>",
                          "<FOR> <MY>? <scalar> ( <mexpr> ) <mblock> <cont>",
                          mk_js(function(args)
                          {
@@ -1334,16 +1335,20 @@ var grammar = {
                              }
                              scalar = scalar == null ? args[2] : scalar;
 
+                             if (scalar == '')
+                             {
+                               scalar = 'topic';
+                             }
+
                              return new mgc_nodes.foreach(scalar, args[4], args[6], args[7]);
                            }
 
-                           return new_scope(gen_block, mem);
+                           return new_scope(gen_block, mem, { need_topic: true, iife: true});
                          }),
                        ],
 		       //"<FOR> <scalar> ( <mexpr> ) <mblock> <cont>",
 		       "<FOR> <REFGEN> <MY> <my_var> ( <mexpr> ) <mblock> <cont>",
 		       "<FOR> <REFGEN> <refgen_topic> ( <mexpr> ) <mblock> <cont>",
-		       "<FOR> ( <mexpr> ) <mblock> <cont>",
 		       "<block> <cont>",
                        [
                          "<PACKAGE> <PKGWORD> <WORD>? { <stmtseq> }",

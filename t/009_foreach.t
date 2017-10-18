@@ -26,4 +26,11 @@ foreach my $i4 ( 10..12 )
 #say "ok $i5 - foreach works for postfix"
 #  foreach my $i5 ( 13..15 );
 
-say '1..15';
+my $l;
+foreach ( 16..18 )
+{
+  my $s;
+  say "ok $_ - foreach works with topic";
+}
+
+say '1..18';
